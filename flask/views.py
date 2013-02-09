@@ -68,6 +68,8 @@ class View(object):
         """
         raise NotImplementedError()
 
+    #as_viewはクラスメソッド
+    # app.add_url_rule('/users/', view_func=ShowUsers.as_view('show_users'))
     @classmethod
     def as_view(cls, name, *class_args, **class_kwargs):
         """Converts the class into an actual view function that can be used
@@ -82,6 +84,7 @@ class View(object):
             self = view.view_class(*class_args, **class_kwargs)
             return self.dispatch_request(*args, **kwargs)
 
+        # view.__name__ = nameはデコレーターで名前が変わるのを防ぐため
         if cls.decorators:
             view.__name__ = name
             view.__module__ = cls.__module__
@@ -93,10 +96,14 @@ class View(object):
         # view this thing came from, secondly it's also used for instantiating
         # the view class so you can actually replace it with something else
         # for testing purposes and debugging.
+
+        # view_classはas_viewでよばれた時のcls
         view.view_class = cls
+        # __name__,__doc__,__module__は関数由来
         view.__name__ = name
         view.__doc__ = cls.__doc__
         view.__module__ = cls.__module__
+        # methodsはViewクラスで定義
         view.methods = cls.methods
         return view
 
@@ -104,6 +111,7 @@ class View(object):
 class MethodViewType(type):
 
     def __new__(cls, name, bases, d):
+        # Classを作る
         rv = type.__new__(cls, name, bases, d)
         if 'methods' not in d:
             methods = set(rv.methods or [])
@@ -119,6 +127,8 @@ class MethodViewType(type):
         return rv
 
 
+# メソッドに応じた処理をディスパッチするdispatch_requestが
+# 定義されている
 class MethodView(View):
     """Like a regular class-based view but that dispatches requests to
     particular methods.  For instance if you implement a method called

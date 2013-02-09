@@ -147,7 +147,9 @@ the arguments from the URL rule.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-7'>#</a>
       </div>
-      <p>Converts the class into an actual view function that can be used</p>
+      <p>as_viewはクラスメソッド
+app.add_url_rule('/users/', view_func=ShowUsers.as_view('show_users'))
+Converts the class into an actual view function that can be used</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre>    <span class="nd">@classmethod</span>
@@ -169,13 +171,7 @@ constructor of the class.</p>
     <div class='code'>
       <div class="highlight"><pre>        <span class="k">def</span> <span class="nf">view</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
             <span class="bp">self</span> <span class="o">=</span> <span class="n">view</span><span class="o">.</span><span class="n">view_class</span><span class="p">(</span><span class="o">*</span><span class="n">class_args</span><span class="p">,</span> <span class="o">**</span><span class="n">class_kwargs</span><span class="p">)</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_request</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">decorators</span><span class="p">:</span>
-            <span class="n">view</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">name</span>
-            <span class="n">view</span><span class="o">.</span><span class="n">__module__</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span>
-            <span class="k">for</span> <span class="n">decorator</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">decorators</span><span class="p">:</span>
-                <span class="n">view</span> <span class="o">=</span> <span class="n">decorator</span><span class="p">(</span><span class="n">view</span><span class="p">)</span></pre></div>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispatch_request</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -184,19 +180,14 @@ constructor of the class.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-9'>#</a>
       </div>
-      <p>we attach the view class to the view function for two reasons:
-first of all it allows us to easily figure out what class-based
-view this thing came from, secondly it's also used for instantiating
-the view class so you can actually replace it with something else
-for testing purposes and debugging.</p>
+      <p>view.<strong>name</strong> = nameはデコレーターで名前が変わるのを防ぐため</p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre>        <span class="n">view</span><span class="o">.</span><span class="n">view_class</span> <span class="o">=</span> <span class="n">cls</span>
-        <span class="n">view</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="n">view</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__doc__</span>
-        <span class="n">view</span><span class="o">.</span><span class="n">__module__</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span>
-        <span class="n">view</span><span class="o">.</span><span class="n">methods</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">methods</span>
-        <span class="k">return</span> <span class="n">view</span></pre></div>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">decorators</span><span class="p">:</span>
+            <span class="n">view</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="n">view</span><span class="o">.</span><span class="n">__module__</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span>
+            <span class="k">for</span> <span class="n">decorator</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">decorators</span><span class="p">:</span>
+                <span class="n">view</span> <span class="o">=</span> <span class="n">decorator</span><span class="p">(</span><span class="n">view</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -205,10 +196,14 @@ for testing purposes and debugging.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-10'>#</a>
       </div>
-      
+      <p>we attach the view class to the view function for two reasons:
+first of all it allows us to easily figure out what class-based
+view this thing came from, secondly it's also used for instantiating
+the view class so you can actually replace it with something else
+for testing purposes and debugging.</p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre><span class="k">class</span> <span class="nc">MethodViewType</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span></pre></div>
+      <div class="highlight"><pre></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -217,11 +212,73 @@ for testing purposes and debugging.</p>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-11'>#</a>
       </div>
+      <p>view_classはas_viewでよばれた時のcls</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">view</span><span class="o">.</span><span class="n">view_class</span> <span class="o">=</span> <span class="n">cls</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p><strong>name</strong>,<strong>doc</strong>,<strong>module</strong>は関数由来</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">view</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__doc__</span>
+        <span class="n">view</span><span class="o">.</span><span class="n">__module__</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>methodsはViewクラスで定義</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">view</span><span class="o">.</span><span class="n">methods</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">methods</span>
+        <span class="k">return</span> <span class="n">view</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
       
     </div>
     <div class='code'>
-      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="n">rv</span> <span class="o">=</span> <span class="nb">type</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">MethodViewType</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>Classを作る</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">rv</span> <span class="o">=</span> <span class="nb">type</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
         <span class="k">if</span> <span class="s">&#39;methods&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
             <span class="n">methods</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">methods</span> <span class="ow">or</span> <span class="p">[])</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
@@ -230,10 +287,10 @@ for testing purposes and debugging.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-12'>
+  <div class='section' id='section-17'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-12'>#</a>
+        <a class='octothorpe' href='#section-17'>#</a>
       </div>
       <p>if we have no method at all in there we don't want to
 add a method list.  (This is for instance the case for
@@ -247,22 +304,24 @@ that does not introduce new methods).</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-13'>
+  <div class='section' id='section-18'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-13'>#</a>
+        <a class='octothorpe' href='#section-18'>#</a>
       </div>
-      <p>Like a regular class-based view but that dispatches requests to</p>
+      <p>メソッドに応じた処理をディスパッチするdispatch_requestが
+定義されている
+Like a regular class-based view but that dispatches requests to</p>
     </div>
     <div class='code'>
       <div class="highlight"><pre><span class="k">class</span> <span class="nc">MethodView</span><span class="p">(</span><span class="n">View</span><span class="p">):</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-14'>
+  <div class='section' id='section-19'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-14'>#</a>
+        <a class='octothorpe' href='#section-19'>#</a>
       </div>
       <p>particular methods.  For instance if you implement a method called
 :meth:<code>get</code> it means you will response to <code>'GET'</code> requests and
@@ -286,10 +345,10 @@ app.add_url_rule('/counter', view_func=CounterAPI.as_view('counter'))
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-15'>
+  <div class='section' id='section-20'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-15'>#</a>
+        <a class='octothorpe' href='#section-20'>#</a>
       </div>
       
     </div>
@@ -299,10 +358,10 @@ app.add_url_rule('/counter', view_func=CounterAPI.as_view('counter'))
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-16'>
+  <div class='section' id='section-21'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-16'>#</a>
+        <a class='octothorpe' href='#section-21'>#</a>
       </div>
       <p>if the request method is HEAD and we don't have a handler for it
 retry with GET</p>
