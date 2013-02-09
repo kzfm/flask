@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>helpers.py</title>
+  <link rel="stylesheet" href="../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  
+  <div class='section'>
+    <div class='docs'><h1>helpers.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <pre><code>flask.testsuite.helpers
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Various helpers.
+
+:copyright: (c) 2011 by Armin Ronacher.
+:license: BSD, see LICENSE for more details.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">flask</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">StreamHandler</span>
+<span class="kn">from</span> <span class="nn">StringIO</span> <span class="kn">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">flask.testsuite</span> <span class="kn">import</span> <span class="n">FlaskTestCase</span><span class="p">,</span> <span class="n">catch_warnings</span><span class="p">,</span> <span class="n">catch_stderr</span>
+<span class="kn">from</span> <span class="nn">werkzeug.http</span> <span class="kn">import</span> <span class="n">parse_cache_control_header</span><span class="p">,</span> <span class="n">parse_options_header</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">has_encoding</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">codecs</span>
+        <span class="n">codecs</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">except</span> <span class="ne">LookupError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">JSONTestCase</span><span class="p">(</span><span class="n">FlaskTestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_json_bad_requests</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/json&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">])</span>
+        <span class="k">def</span> <span class="nf">return_json</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/json&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s">&#39;malformed&#39;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_json_bad_requests_content_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/json&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">])</span>
+        <span class="k">def</span> <span class="nf">return_json</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/json&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s">&#39;malformed&#39;</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;description&#39;</span> <span class="ow">in</span> <span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;&lt;p&gt;&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">)[</span><span class="s">&#39;description&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">test_json_body_encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">json</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="s">u&#39;&quot;HÃ¤llo WÃ¶rld&quot;&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;iso-8859-15&#39;</span><span class="p">),</span>
+                     <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json; charset=iso-8859-15&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">u&#39;HÃ¤llo WÃ¶rld&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_jsonify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">23</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/kw&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">return_kwargs</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/dict&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">return_dict</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">jsonify</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="s">&#39;/kw&#39;</span><span class="p">,</span> <span class="s">&#39;/dict&#39;</span><span class="p">:</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_json_as_unicode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;JSON_AS_ASCII&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\N{SNOWMAN}</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="s">&#39;&quot;</span><span class="se">\\</span><span class="s">u2603&quot;&#39;</span><span class="p">)</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;JSON_AS_ASCII&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="s">u&#39;</span><span class="se">\N{SNOWMAN}</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="s">u&#39;&quot;</span><span class="se">\u2603</span><span class="s">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_json_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/add&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">])</span>
+        <span class="k">def</span> <span class="nf">add</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s">&#39;b&#39;</span><span class="p">])</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/add&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}),</span>
+                            <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_template_escaping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">render</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template_string</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="s">&#39;{{ &quot;&lt;/script&gt;&quot;|tojson|safe }}&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="s">&#39;&quot;&lt;</span><span class="se">\\</span><span class="s">/script&gt;&quot;&#39;</span><span class="p">)</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="s">&#39;{{ &quot;&lt;</span><span class="se">\0</span><span class="s">/script&gt;&quot;|tojson|safe }}&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="s">&#39;&quot;&lt;</span><span class="se">\\</span><span class="s">u0000</span><span class="se">\\</span><span class="s">/script&gt;&quot;&#39;</span><span class="p">)</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">render</span><span class="p">(</span><span class="s">&#39;{{ &quot;&lt;!--&lt;script&gt;&quot;|tojson|safe }}&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="s">&#39;&quot;&lt;</span><span class="se">\\</span><span class="s">u0021--&lt;script&gt;&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_json_customization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">class</span> <span class="nc">X</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">class</span> <span class="nc">MyEncoder</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="s">&#39;&lt;</span><span class="si">%d</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="n">o</span><span class="o">.</span><span class="n">val</span>
+                <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span>
+        <span class="k">class</span> <span class="nc">MyDecoder</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecoder</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;object_hook&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_hook</span><span class="p">)</span>
+                <span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecoder</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s">&#39;_foo&#39;</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">X</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="s">&#39;_foo&#39;</span><span class="p">])</span>
+                <span class="k">return</span> <span class="n">obj</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">json_encoder</span> <span class="o">=</span> <span class="n">MyEncoder</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">json_decoder</span> <span class="o">=</span> <span class="n">MyDecoder</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">])</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">])</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">flask</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span>
+            <span class="s">&#39;x&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s">&#39;_foo&#39;</span><span class="p">:</span> <span class="mi">42</span><span class="p">}</span>
+        <span class="p">}),</span> <span class="n">content_type</span><span class="o">=</span><span class="s">&#39;application/json&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;&quot;&lt;42&gt;&quot;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_modified_url_encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">class</span> <span class="nc">ModifiedRequest</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">Request</span><span class="p">):</span>
+            <span class="n">url_charset</span> <span class="o">=</span> <span class="s">&#39;euc-kr&#39;</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">request_class</span> <span class="o">=</span> <span class="n">ModifiedRequest</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">url_map</span><span class="o">.</span><span class="n">charset</span> <span class="o">=</span> <span class="s">&#39;euc-kr&#39;</span>
+
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;foo&#39;</span><span class="p">]</span>
+
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">u&#39;/?foo=ì ìì²ë¦¬&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;euc-kr&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">u&#39;ì ìì²ë¦¬&#39;</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_encoding</span><span class="p">(</span><span class="s">&#39;euc-kr&#39;</span><span class="p">):</span>
+        <span class="n">test_modified_url_encoding</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<span class="k">class</span> <span class="nc">SendfileTestCase</span><span class="p">(</span><span class="n">FlaskTestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_send_file_regular</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="s">&#39;static/index.html&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">direct_passthrough</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">open_resource</span><span class="p">(</span><span class="s">&#39;static/index.html&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">test_send_file_xsendfile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">use_x_sendfile</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="s">&#39;static/index.html&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">direct_passthrough</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;x-sendfile&#39;</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;x-sendfile&#39;</span><span class="p">],</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="s">&#39;static/index.html&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_send_file_object</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">catch_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">captured</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="s">&#39;static/index.html&#39;</span><span class="p">))</span>
+                <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">open_resource</span><span class="p">(</span><span class="s">&#39;static/index.html&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>mimetypes + etag</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">captured</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">use_x_sendfile</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">with</span> <span class="n">catch_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">captured</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="s">&#39;static/index.html&#39;</span><span class="p">))</span>
+                <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;text/html&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;x-sendfile&#39;</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;x-sendfile&#39;</span><span class="p">],</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="s">&#39;static/index.html&#39;</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>mimetypes + etag</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">captured</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">use_x_sendfile</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">catch_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">captured</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="s">&#39;Test&#39;</span><span class="p">)</span>
+                <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Test&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;application/octet-stream&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>etags</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">captured</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">catch_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">captured</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="s">&#39;Test&#39;</span><span class="p">)</span>
+                <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="s">&#39;text/plain&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Test&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;text/plain&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      <p>etags</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">captured</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">use_x_sendfile</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">with</span> <span class="n">catch_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">captured</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(</span><span class="s">&#39;Test&#39;</span><span class="p">)</span>
+                <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;x-sendfile&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      <p>etags</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">captured</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_attachment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">catch_warnings</span><span class="p">()</span> <span class="k">as</span> <span class="n">captured</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="s">&#39;static/index.html&#39;</span><span class="p">))</span>
+                <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">as_attachment</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="n">value</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">parse_options_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Disposition&#39;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;attachment&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>mimetypes + etag</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">captured</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s">&#39;filename&#39;</span><span class="p">],</span> <span class="s">&#39;index.html&#39;</span><span class="p">)</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="s">&#39;static/index.html&#39;</span><span class="p">,</span> <span class="n">as_attachment</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">parse_options_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Disposition&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;attachment&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s">&#39;filename&#39;</span><span class="p">],</span> <span class="s">&#39;index.html&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="n">StringIO</span><span class="p">(</span><span class="s">&#39;Test&#39;</span><span class="p">),</span> <span class="n">as_attachment</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                 <span class="n">attachment_filename</span><span class="o">=</span><span class="s">&#39;index.txt&#39;</span><span class="p">,</span>
+                                 <span class="n">add_etags</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">mimetype</span><span class="p">,</span> <span class="s">&#39;text/plain&#39;</span><span class="p">)</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="n">parse_options_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Disposition&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;attachment&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s">&#39;filename&#39;</span><span class="p">],</span> <span class="s">&#39;index.txt&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_static_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>default cache timeout is 12 hours</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>Test with static file handler.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">send_static_file</span><span class="p">(</span><span class="s">&#39;index.html&#39;</span><span class="p">)</span>
+            <span class="n">cc</span> <span class="o">=</span> <span class="n">parse_cache_control_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cache-Control&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">max_age</span><span class="p">,</span> <span class="mi">12</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Test again with direct use of send_file utility.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="s">&#39;static/index.html&#39;</span><span class="p">)</span>
+            <span class="n">cc</span> <span class="o">=</span> <span class="n">parse_cache_control_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cache-Control&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">max_age</span><span class="p">,</span> <span class="mi">12</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3600</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>Test with static file handler.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">send_static_file</span><span class="p">(</span><span class="s">&#39;index.html&#39;</span><span class="p">)</span>
+            <span class="n">cc</span> <span class="o">=</span> <span class="n">parse_cache_control_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cache-Control&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">max_age</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p>Test again with direct use of send_file utility.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="s">&#39;static/index.html&#39;</span><span class="p">)</span>
+            <span class="n">cc</span> <span class="o">=</span> <span class="n">parse_cache_control_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cache-Control&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">max_age</span><span class="p">,</span> <span class="mi">3600</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">class</span> <span class="nc">StaticFileApp</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">def</span> <span class="nf">get_send_file_max_age</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">10</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">StaticFileApp</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p>Test with static file handler.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">send_static_file</span><span class="p">(</span><span class="s">&#39;index.html&#39;</span><span class="p">)</span>
+            <span class="n">cc</span> <span class="o">=</span> <span class="n">parse_cache_control_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cache-Control&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">max_age</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>Test again with direct use of send_file utility.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">send_file</span><span class="p">(</span><span class="s">&#39;static/index.html&#39;</span><span class="p">)</span>
+            <span class="n">cc</span> <span class="o">=</span> <span class="n">parse_cache_control_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cache-Control&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">max_age</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">LoggingTestCase</span><span class="p">(</span><span class="n">FlaskTestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_logger_cache</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger1</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">logger</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="n">logger1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">logger1</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">logger_name</span> <span class="o">=</span> <span class="n">__name__</span> <span class="o">+</span> <span class="s">&#39;/test_logger_cache&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">logger</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">logger1</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_debug_log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="bp">True</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p>Test Flasks are created without import.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&#39;the standard library is dead&#39;</span><span class="p">)</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;this is a debug statement&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/exc&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">exc</span><span class="p">():</span>
+            <span class="mi">1</span><span class="o">/</span><span class="mi">0</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span> <span class="k">as</span> <span class="n">c</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">catch_stderr</span><span class="p">()</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">err</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;WARNING in helpers [&#39;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">__file__</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.py&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">out</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;the standard library is dead&#39;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;this is a debug statement&#39;</span> <span class="ow">in</span> <span class="n">out</span><span class="p">)</span>
+
+            <span class="k">with</span> <span class="n">catch_stderr</span><span class="p">()</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/exc&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="s">&#39;debug log ate the exception&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_debug_log_override</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">logger_name</span> <span class="o">=</span> <span class="s">&#39;flask_tests/test_debug_log_override&#39;</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">level</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_exception_logging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">logger_name</span> <span class="o">=</span> <span class="s">&#39;flask_tests/test_exception_logging&#39;</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">out</span><span class="p">))</span>
+
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="mi">1</span><span class="o">/</span><span class="mi">0</span>
+
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;Internal Server Error&#39;</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="n">err</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;Exception on / [GET]&#39;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;Traceback (most recent call last):&#39;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;1/0&#39;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;ZeroDivisionError:&#39;</span> <span class="ow">in</span> <span class="n">err</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_processor_exceptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.before_request</span>
+        <span class="k">def</span> <span class="nf">before_request</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="s">&#39;before&#39;</span><span class="p">:</span>
+                <span class="mi">1</span><span class="o">/</span><span class="mi">0</span>
+        <span class="nd">@app.after_request</span>
+        <span class="k">def</span> <span class="nf">after_request</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">trigger</span> <span class="o">==</span> <span class="s">&#39;after&#39;</span><span class="p">:</span>
+                <span class="mi">1</span><span class="o">/</span><span class="mi">0</span>
+            <span class="k">return</span> <span class="n">response</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;Foo&#39;</span>
+        <span class="nd">@app.errorhandler</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">internal_server_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;Hello Server Error&#39;</span><span class="p">,</span> <span class="mi">500</span>
+        <span class="k">for</span> <span class="n">trigger</span> <span class="ow">in</span> <span class="s">&#39;before&#39;</span><span class="p">,</span> <span class="s">&#39;after&#39;</span><span class="p">:</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello Server Error&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_url_for_with_anchor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;42&#39;</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;index&#39;</span><span class="p">,</span> <span class="n">_anchor</span><span class="o">=</span><span class="s">&#39;x y&#39;</span><span class="p">),</span>
+                              <span class="s">&#39;/#x%20y&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_url_for_with_scheme</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;42&#39;</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;index&#39;</span><span class="p">,</span>
+                                            <span class="n">_external</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                            <span class="n">_scheme</span><span class="o">=</span><span class="s">&#39;https&#39;</span><span class="p">),</span>
+                              <span class="s">&#39;https://localhost/&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_url_for_with_scheme_not_external</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;42&#39;</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_raises</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span>
+                               <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">,</span>
+                               <span class="s">&#39;index&#39;</span><span class="p">,</span>
+                               <span class="n">_scheme</span><span class="o">=</span><span class="s">&#39;https&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_url_with_method</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">flask.views</span> <span class="kn">import</span> <span class="n">MethodView</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">class</span> <span class="nc">MyView</span><span class="p">(</span><span class="n">MethodView</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="s">&#39;List&#39;</span>
+                <span class="k">return</span> <span class="s">&#39;Get </span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="nb">id</span>
+            <span class="k">def</span> <span class="nf">post</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s">&#39;Create&#39;</span>
+        <span class="n">myview</span> <span class="o">=</span> <span class="n">MyView</span><span class="o">.</span><span class="n">as_view</span><span class="p">(</span><span class="s">&#39;myview&#39;</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s">&#39;/myview/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;GET&#39;</span><span class="p">],</span>
+                         <span class="n">view_func</span><span class="o">=</span><span class="n">myview</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s">&#39;/myview/&lt;int:id&gt;&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;GET&#39;</span><span class="p">],</span>
+                         <span class="n">view_func</span><span class="o">=</span><span class="n">myview</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s">&#39;/myview/create&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;POST&#39;</span><span class="p">],</span>
+                         <span class="n">view_func</span><span class="o">=</span><span class="n">myview</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;myview&#39;</span><span class="p">,</span> <span class="n">_method</span><span class="o">=</span><span class="s">&#39;GET&#39;</span><span class="p">),</span>
+                              <span class="s">&#39;/myview/&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;myview&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">_method</span><span class="o">=</span><span class="s">&#39;GET&#39;</span><span class="p">),</span>
+                              <span class="s">&#39;/myview/42&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;myview&#39;</span><span class="p">,</span> <span class="n">_method</span><span class="o">=</span><span class="s">&#39;POST&#39;</span><span class="p">),</span>
+                              <span class="s">&#39;/myview/create&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">NoImportsTestCase</span><span class="p">(</span><span class="n">FlaskTestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p>Avoiding <code>__import__</code> helps create Flask instances where there are errors
+at import time.  Those runtime errors will be apparent to the user soon
+enough, but tools which build Flask instances meta-programmatically benefit
+from a Flask which does not <code>__import__</code>.  Instead of importing to
+retrieve file paths or metadata on a module or package, use the pkgutil and
+imp modules in the Python standard library.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_name_with_import_error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="s">&#39;importerror&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fail</span><span class="p">(</span><span class="s">&#39;Flask(import_name) is importing import_name.&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">StreamingTestCase</span><span class="p">(</span><span class="n">FlaskTestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_streaming_with_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="bp">True</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">def</span> <span class="nf">generate</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="s">&#39;Hello &#39;</span>
+                <span class="k">yield</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="k">yield</span> <span class="s">&#39;!&#39;</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">stream_with_context</span><span class="p">(</span><span class="n">generate</span><span class="p">()))</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/?name=World&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello World!&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_streaming_with_context_as_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="nd">@flask.stream_with_context</span>
+            <span class="k">def</span> <span class="nf">generate</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="s">&#39;Hello &#39;</span>
+                <span class="k">yield</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="k">yield</span> <span class="s">&#39;!&#39;</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span><span class="n">generate</span><span class="p">())</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/?name=World&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello World!&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_streaming_with_context_and_custom_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">called</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">class</span> <span class="nc">Wrapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gen</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_gen</span> <span class="o">=</span> <span class="n">gen</span>
+            <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span>
+            <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="n">called</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">def</span> <span class="nf">generate</span><span class="p">():</span>
+                <span class="k">yield</span> <span class="s">&#39;Hello &#39;</span>
+                <span class="k">yield</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+                <span class="k">yield</span> <span class="s">&#39;!&#39;</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">Response</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">stream_with_context</span><span class="p">(</span>
+                <span class="n">Wrapper</span><span class="p">(</span><span class="n">generate</span><span class="p">())))</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/?name=World&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello World!&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">called</span><span class="p">,</span> <span class="p">[</span><span class="mi">42</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">suite</span><span class="p">():</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">flask</span><span class="o">.</span><span class="n">json_available</span><span class="p">:</span>
+        <span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">JSONTestCase</span><span class="p">))</span>
+    <span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">SendfileTestCase</span><span class="p">))</span>
+    <span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">LoggingTestCase</span><span class="p">))</span>
+    <span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">NoImportsTestCase</span><span class="p">))</span>
+    <span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">StreamingTestCase</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">suite</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  
+</div>
+</body>

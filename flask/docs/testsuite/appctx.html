@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>appctx.py</title>
+  <link rel="stylesheet" href="../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  
+  <div class='section'>
+    <div class='docs'><h1>appctx.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <pre><code>flask.testsuite.appctx
+~~~~~~~~~~~~~~~~~~~~~~
+
+Tests the application context.
+
+:copyright: (c) 2012 by Armin Ronacher.
+:license: BSD, see LICENSE for more details.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">import</span> <span class="nn">flask</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">flask.testsuite</span> <span class="kn">import</span> <span class="n">FlaskTestCase</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">AppContextTestCase</span><span class="p">(</span><span class="n">FlaskTestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_basic_url_generation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SERVER_NAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;localhost&#39;</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;PREFERRED_URL_SCHEME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;https&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">pass</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;index&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="s">&#39;https://localhost/&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_url_generation_requires_server_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assert_raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+                <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;index&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_url_generation_without_context_fails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">assert_raises</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
+            <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;index&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_request_context_means_app_context</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">current_app</span><span class="o">.</span><span class="n">_get_current_object</span><span class="p">(),</span> <span class="n">app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">_app_ctx_stack</span><span class="o">.</span><span class="n">top</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_app_context_provides_current_app</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">current_app</span><span class="o">.</span><span class="n">_get_current_object</span><span class="p">(),</span> <span class="n">app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">_app_ctx_stack</span><span class="o">.</span><span class="n">top</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_app_tearing_down</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cleanup_stuff</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.teardown_appcontext</span>
+        <span class="k">def</span> <span class="nf">cleanup</span><span class="p">(</span><span class="n">exception</span><span class="p">):</span>
+            <span class="n">cleanup_stuff</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">exception</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+            <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cleanup_stuff</span><span class="p">,</span> <span class="p">[</span><span class="bp">None</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">test_custom_app_ctx_globals_class</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">class</span> <span class="nc">CustomRequestGlobals</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">spam</span> <span class="o">=</span> <span class="s">&#39;eggs&#39;</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">app_ctx_globals_class</span> <span class="o">=</span> <span class="n">CustomRequestGlobals</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">app_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span>
+                <span class="n">flask</span><span class="o">.</span><span class="n">render_template_string</span><span class="p">(</span><span class="s">&#39;{{ g.spam }}&#39;</span><span class="p">),</span> <span class="s">&#39;eggs&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_context_refcounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">called</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.teardown_request</span>
+        <span class="k">def</span> <span class="nf">teardown_req</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+            <span class="n">called</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;request&#39;</span><span class="p">)</span>
+        <span class="nd">@app.teardown_appcontext</span>
+        <span class="k">def</span> <span class="nf">teardown_app</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+            <span class="n">called</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;app&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">with</span> <span class="n">flask</span><span class="o">.</span><span class="n">_app_ctx_stack</span><span class="o">.</span><span class="n">top</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">flask</span><span class="o">.</span><span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">top</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">environ</span>
+                <span class="p">[</span><span class="s">&#39;werkzeug.request&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">called</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;request&#39;</span><span class="p">,</span> <span class="s">&#39;app&#39;</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">suite</span><span class="p">():</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">()</span>
+    <span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">AppContextTestCase</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">suite</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  
+</div>
+</body>

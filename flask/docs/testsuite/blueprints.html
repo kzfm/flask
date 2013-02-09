@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>blueprints.py</title>
+  <link rel="stylesheet" href="../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  
+  <div class='section'>
+    <div class='docs'><h1>blueprints.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <pre><code>flask.testsuite.blueprints
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Blueprints (and currently modules)
+
+:copyright: (c) 2011 by Armin Ronacher.
+:license: BSD, see LICENSE for more details.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">import</span> <span class="nn">flask</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">flask.testsuite</span> <span class="kn">import</span> <span class="n">FlaskTestCase</span><span class="p">,</span> <span class="n">emits_module_deprecation_warning</span>
+<span class="kn">from</span> <span class="nn">werkzeug.exceptions</span> <span class="kn">import</span> <span class="n">NotFound</span>
+<span class="kn">from</span> <span class="nn">werkzeug.http</span> <span class="kn">import</span> <span class="n">parse_cache_control_header</span>
+<span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">TemplateNotFound</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>import moduleapp here because it uses deprecated features and we don't
+want to see the warnings</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">&#39;ignore&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">moduleapp</span> <span class="kn">import</span> <span class="n">app</span> <span class="k">as</span> <span class="n">moduleapp</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s">&#39;default&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">ModuleTestCase</span><span class="p">(</span><span class="n">FlaskTestCase</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@emits_module_deprecation_warning</span>
+    <span class="k">def</span> <span class="nf">test_basic_module</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&#39;admin&#39;</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/admin&#39;</span><span class="p">)</span>
+        <span class="nd">@admin.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">admin_index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;admin index&#39;</span>
+        <span class="nd">@admin.route</span><span class="p">(</span><span class="s">&#39;/login&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">admin_login</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;admin login&#39;</span>
+        <span class="nd">@admin.route</span><span class="p">(</span><span class="s">&#39;/logout&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">admin_logout</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;admin logout&#39;</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;the index&#39;</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">admin</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;the index&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;admin index&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/login&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;admin login&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/logout&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;admin logout&#39;</span><span class="p">)</span>
+
+    <span class="nd">@emits_module_deprecation_warning</span>
+    <span class="k">def</span> <span class="nf">test_default_endpoint_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">mod</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&#39;frontend&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;Awesome&#39;</span>
+        <span class="n">mod</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Awesome&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;frontend.index&#39;</span><span class="p">),</span> <span class="s">&#39;/&#39;</span><span class="p">)</span>
+
+    <span class="nd">@emits_module_deprecation_warning</span>
+    <span class="k">def</span> <span class="nf">test_request_processing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">catched</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&#39;admin&#39;</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/admin&#39;</span><span class="p">)</span>
+        <span class="nd">@admin.before_request</span>
+        <span class="k">def</span> <span class="nf">before_admin_request</span><span class="p">():</span>
+            <span class="n">catched</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;before-admin&#39;</span><span class="p">)</span>
+        <span class="nd">@admin.after_request</span>
+        <span class="k">def</span> <span class="nf">after_admin_request</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+            <span class="n">catched</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;after-admin&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span>
+        <span class="nd">@admin.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">admin_index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;the admin&#39;</span>
+        <span class="nd">@app.before_request</span>
+        <span class="k">def</span> <span class="nf">before_request</span><span class="p">():</span>
+            <span class="n">catched</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;before-app&#39;</span><span class="p">)</span>
+        <span class="nd">@app.after_request</span>
+        <span class="k">def</span> <span class="nf">after_request</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+            <span class="n">catched</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;after-app&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">response</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;the index&#39;</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">admin</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;the index&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">catched</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;before-app&#39;</span><span class="p">,</span> <span class="s">&#39;after-app&#39;</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">catched</span><span class="p">[:]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;the admin&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">catched</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;before-app&#39;</span><span class="p">,</span> <span class="s">&#39;before-admin&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;after-admin&#39;</span><span class="p">,</span> <span class="s">&#39;after-app&#39;</span><span class="p">])</span>
+
+    <span class="nd">@emits_module_deprecation_warning</span>
+    <span class="k">def</span> <span class="nf">test_context_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&#39;admin&#39;</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/admin&#39;</span><span class="p">)</span>
+        <span class="nd">@app.context_processor</span>
+        <span class="k">def</span> <span class="nf">inject_all_regualr</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+        <span class="nd">@admin.context_processor</span>
+        <span class="k">def</span> <span class="nf">inject_admin</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+        <span class="nd">@admin.app_context_processor</span>
+        <span class="k">def</span> <span class="nf">inject_all_module</span><span class="p">():</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s">&#39;c&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template_string</span><span class="p">(</span><span class="s">&#39;{{ a }}{{ b }}{{ c }}&#39;</span><span class="p">)</span>
+        <span class="nd">@admin.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">admin_index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template_string</span><span class="p">(</span><span class="s">&#39;{{ a }}{{ b }}{{ c }}&#39;</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">admin</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;13&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;123&#39;</span><span class="p">)</span>
+
+    <span class="nd">@emits_module_deprecation_warning</span>
+    <span class="k">def</span> <span class="nf">test_late_binding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&#39;admin&#39;</span><span class="p">)</span>
+        <span class="nd">@admin.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;42&#39;</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">admin</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/admin&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;42&#39;</span><span class="p">)</span>
+
+    <span class="nd">@emits_module_deprecation_warning</span>
+    <span class="k">def</span> <span class="nf">test_error_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">admin</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Module</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="s">&#39;admin&#39;</span><span class="p">)</span>
+        <span class="nd">@admin.app_errorhandler</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">not_found</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;not found&#39;</span><span class="p">,</span> <span class="mi">404</span>
+        <span class="nd">@admin.app_errorhandler</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">internal_server_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;internal server error&#39;</span><span class="p">,</span> <span class="mi">500</span>
+        <span class="nd">@admin.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="n">flask</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+        <span class="nd">@admin.route</span><span class="p">(</span><span class="s">&#39;/error&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">error</span><span class="p">():</span>
+            <span class="mi">1</span> <span class="o">//</span> <span class="mi">0</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">admin</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">404</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;not found&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/error&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="s">&#39;internal server error&#39;</span><span class="p">,</span> <span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_templates_and_static</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">moduleapp</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello from the Frontend&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello from the Admin&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/index2&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello from the Admin&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/static/test.txt&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s">&#39;Admin File&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/static/css/test.css&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s">&#39;/* nested file */&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;admin.static&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&#39;test.txt&#39;</span><span class="p">),</span>
+                              <span class="s">&#39;/admin/static/test.txt&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;missing.html&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">TemplateNotFound</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;missing.html&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;expected exception&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;nested/nested.txt&#39;</span><span class="p">),</span> <span class="s">&#39;I</span><span class="se">\&#39;</span><span class="s">m nested&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_safe_access</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">moduleapp</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">view_functions</span><span class="p">[</span><span class="s">&#39;admin.static&#39;</span><span class="p">]</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">f</span><span class="p">(</span><span class="s">&#39;/etc/passwd&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">NotFound</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;expected exception&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">f</span><span class="p">(</span><span class="s">&#39;../__init__.py&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">NotFound</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;expected exception&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>testcase for a security issue that may exist on windows systems</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="kn">import</span> <span class="nn">os</span>
+            <span class="kn">import</span> <span class="nn">ntpath</span>
+            <span class="n">old_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">ntpath</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">f</span><span class="p">(</span><span class="s">&#39;..</span><span class="se">\\</span><span class="s">__init__.py&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="n">NotFound</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;expected exception&#39;</span><span class="p">)</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">old_path</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@emits_module_deprecation_warning</span>
+    <span class="k">def</span> <span class="nf">test_endpoint_decorator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">werkzeug.routing</span> <span class="kn">import</span> <span class="n">Submount</span><span class="p">,</span> <span class="n">Rule</span>
+        <span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Module</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">url_map</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Submount</span><span class="p">(</span><span class="s">&#39;/foo&#39;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="s">&#39;/bar&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;bar&#39;</span><span class="p">),</span>
+            <span class="n">Rule</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;index&#39;</span><span class="p">)</span>
+        <span class="p">]))</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">Module</span><span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+
+        <span class="nd">@module.endpoint</span><span class="p">(</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">bar</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;bar&#39;</span>
+
+        <span class="nd">@module.endpoint</span><span class="p">(</span><span class="s">&#39;index&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s">&#39;index&#39;</span>
+
+        <span class="n">app</span><span class="o">.</span><span class="n">register_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/foo/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;index&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/foo/bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;bar&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BlueprintTestCase</span><span class="p">(</span><span class="n">FlaskTestCase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">test_blueprint_specific_error_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">frontend</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;frontend&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;backend&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="n">sideend</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;sideend&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+
+        <span class="nd">@frontend.errorhandler</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">frontend_forbidden</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;frontend says no&#39;</span><span class="p">,</span> <span class="mi">403</span>
+
+        <span class="nd">@frontend.route</span><span class="p">(</span><span class="s">&#39;/frontend-no&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">frontend_no</span><span class="p">():</span>
+            <span class="n">flask</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+
+        <span class="nd">@backend.errorhandler</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">backend_forbidden</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;backend says no&#39;</span><span class="p">,</span> <span class="mi">403</span>
+
+        <span class="nd">@backend.route</span><span class="p">(</span><span class="s">&#39;/backend-no&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">backend_no</span><span class="p">():</span>
+            <span class="n">flask</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+
+        <span class="nd">@sideend.route</span><span class="p">(</span><span class="s">&#39;/what-is-a-sideend&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">sideend_no</span><span class="p">():</span>
+            <span class="n">flask</span><span class="o">.</span><span class="n">abort</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">frontend</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">sideend</span><span class="p">)</span>
+
+        <span class="nd">@app.errorhandler</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">app_forbidden</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;application itself says no&#39;</span><span class="p">,</span> <span class="mi">403</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/frontend-no&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;frontend says no&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/backend-no&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;backend says no&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/what-is-a-sideend&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;application itself says no&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_blueprint_url_definitions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;test&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/foo&#39;</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;baz&#39;</span><span class="p">:</span> <span class="mi">42</span><span class="p">})</span>
+        <span class="k">def</span> <span class="nf">foo</span><span class="p">(</span><span class="n">bar</span><span class="p">,</span> <span class="n">baz</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%d</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">bar</span><span class="p">,</span> <span class="n">baz</span><span class="p">)</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/bar&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">bar</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/1&#39;</span><span class="p">,</span> <span class="n">url_defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;bar&#39;</span><span class="p">:</span> <span class="mi">23</span><span class="p">})</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/2&#39;</span><span class="p">,</span> <span class="n">url_defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;bar&#39;</span><span class="p">:</span> <span class="mi">19</span><span class="p">})</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/1/foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">u&#39;23/42&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/2/foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">u&#39;19/42&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/1/bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">u&#39;23&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/2/bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">u&#39;19&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_blueprint_url_processors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;frontend&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/&lt;lang_code&gt;&#39;</span><span class="p">)</span>
+
+        <span class="nd">@bp.url_defaults</span>
+        <span class="k">def</span> <span class="nf">add_language_code</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;lang_code&#39;</span><span class="p">,</span> <span class="n">flask</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">lang_code</span><span class="p">)</span>
+
+        <span class="nd">@bp.url_value_preprocessor</span>
+        <span class="k">def</span> <span class="nf">pull_lang_code</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+            <span class="n">flask</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">lang_code</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;lang_code&#39;</span><span class="p">)</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;.about&#39;</span><span class="p">)</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/about&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">about</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;.index&#39;</span><span class="p">)</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/de/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;/de/about&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/de/about&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;/de/&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_templates_and_static</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">blueprintapp</span> <span class="kn">import</span> <span class="n">app</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello from the Frontend&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello from the Admin&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/index2&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;Hello from the Admin&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/static/test.txt&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s">&#39;Admin File&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/static/css/test.css&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s">&#39;/* nested file */&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>try/finally, in case other tests use this app for Blueprint tests.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">max_age_default</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">expected_max_age</span> <span class="o">=</span> <span class="mi">3600</span>
+            <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">expected_max_age</span><span class="p">:</span>
+                <span class="n">expected_max_age</span> <span class="o">=</span> <span class="mi">7200</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expected_max_age</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/admin/static/css/test.css&#39;</span><span class="p">)</span>
+            <span class="n">cc</span> <span class="o">=</span> <span class="n">parse_cache_control_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cache-Control&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">max_age</span><span class="p">,</span> <span class="n">expected_max_age</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_age_default</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;admin.static&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="s">&#39;test.txt&#39;</span><span class="p">),</span>
+                              <span class="s">&#39;/admin/static/test.txt&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;missing.html&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">TemplateNotFound</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;missing.html&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s">&#39;expected exception&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;nested/nested.txt&#39;</span><span class="p">),</span> <span class="s">&#39;I</span><span class="se">\&#39;</span><span class="s">m nested&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_default_static_cache_timeout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">class</span> <span class="nc">MyBlueprint</span><span class="p">(</span><span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">def</span> <span class="nf">get_send_file_max_age</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+                <span class="k">return</span> <span class="mi">100</span>
+
+        <span class="n">blueprint</span> <span class="o">=</span> <span class="n">MyBlueprint</span><span class="p">(</span><span class="s">&#39;blueprint&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">,</span> <span class="n">static_folder</span><span class="o">=</span><span class="s">&#39;static&#39;</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">blueprint</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>try/finally, in case other tests use this app for Blueprint tests.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">max_age_default</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+                <span class="n">unexpected_max_age</span> <span class="o">=</span> <span class="mi">3600</span>
+                <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">unexpected_max_age</span><span class="p">:</span>
+                    <span class="n">unexpected_max_age</span> <span class="o">=</span> <span class="mi">7200</span>
+                <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">unexpected_max_age</span>
+                <span class="n">rv</span> <span class="o">=</span> <span class="n">blueprint</span><span class="o">.</span><span class="n">send_static_file</span><span class="p">(</span><span class="s">&#39;index.html&#39;</span><span class="p">)</span>
+                <span class="n">cc</span> <span class="o">=</span> <span class="n">parse_cache_control_header</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s">&#39;Cache-Control&#39;</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">max_age</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_age_default</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_templates_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">blueprintapp</span> <span class="kn">import</span> <span class="n">app</span>
+        <span class="n">templates</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">list_templates</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">templates</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;admin/index.html&#39;</span><span class="p">,</span>
+                                     <span class="s">&#39;frontend/index.html&#39;</span><span class="p">])</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_dotted_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">frontend</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;myapp.frontend&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="n">backend</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;myapp.backend&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="nd">@frontend.route</span><span class="p">(</span><span class="s">&#39;/fe&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">frontend_index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;myapp.backend.backend_index&#39;</span><span class="p">)</span>
+
+        <span class="nd">@frontend.route</span><span class="p">(</span><span class="s">&#39;/fe2&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">frontend_page2</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;.frontend_index&#39;</span><span class="p">)</span>
+
+        <span class="nd">@backend.route</span><span class="p">(</span><span class="s">&#39;/be&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">backend_index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">url_for</span><span class="p">(</span><span class="s">&#39;myapp.frontend.frontend_index&#39;</span><span class="p">)</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">frontend</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">backend</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/fe&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s">&#39;/be&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/fe2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s">&#39;/fe&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/be&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s">&#39;/fe&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_empty_url_defaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;page&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/page/&lt;int:page&gt;&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">something</span><span class="p">(</span><span class="n">page</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/page/2&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_route_decorator_custom_endpoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/foo&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">endpoint</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/bar&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;bar&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">foo_bar</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">endpoint</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/bar/123&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;123&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">foo_bar_foo</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">endpoint</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/bar/foo&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">bar_foo</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">endpoint</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">endpoint</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;index&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/py/foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;bp.foo&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/py/bar&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;bp.bar&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/py/bar/123&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;bp.123&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/py/bar/foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;bp.bar_foo&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_route_decorator_custom_endpoint_with_dots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+
+        <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/foo&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">foo</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">endpoint</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/bar&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;bar.bar&#39;</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">foo_bar</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">endpoint</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&#39;expected AssertionError not raised&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nd">@bp.route</span><span class="p">(</span><span class="s">&#39;/bar/123&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;bar.123&#39;</span><span class="p">)</span>
+            <span class="k">def</span> <span class="nf">foo_bar_foo</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">endpoint</span>
+        <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s">&#39;expected AssertionError not raised&#39;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">foo_foo_foo</span><span class="p">():</span>
+            <span class="k">pass</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span>
+            <span class="ne">AssertionError</span><span class="p">,</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="n">bp</span><span class="o">.</span><span class="n">add_url_rule</span><span class="p">(</span>
+                <span class="s">&#39;/bar/123&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;bar.123&#39;</span><span class="p">,</span> <span class="n">view_func</span><span class="o">=</span><span class="n">foo_foo_foo</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertRaises</span><span class="p">(</span>
+            <span class="ne">AssertionError</span><span class="p">,</span>
+            <span class="n">bp</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s">&#39;/bar/123&#39;</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="s">&#39;bar.123&#39;</span><span class="p">),</span>
+            <span class="k">lambda</span><span class="p">:</span> <span class="bp">None</span>
+        <span class="p">)</span>
+
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+
+        <span class="n">c</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/py/foo&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;bp.foo&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>The rule's din't actually made it through</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/py/bar&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">rv</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">404</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/py/bar/123&#39;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">rv</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">404</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">test_template_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="nd">@bp.app_template_filter</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">my_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;my_reverse&#39;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;my_reverse&#39;</span><span class="p">],</span> <span class="n">my_reverse</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;my_reverse&#39;</span><span class="p">](</span><span class="s">&#39;abcd&#39;</span><span class="p">),</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_add_template_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">my_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">bp</span><span class="o">.</span><span class="n">add_app_template_filter</span><span class="p">(</span><span class="n">my_reverse</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;my_reverse&#39;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;my_reverse&#39;</span><span class="p">],</span> <span class="n">my_reverse</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;my_reverse&#39;</span><span class="p">](</span><span class="s">&#39;abcd&#39;</span><span class="p">),</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_template_filter_with_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_filter</span><span class="p">(</span><span class="s">&#39;strrev&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">my_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;strrev&#39;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;strrev&#39;</span><span class="p">],</span> <span class="n">my_reverse</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;strrev&#39;</span><span class="p">](</span><span class="s">&#39;abcd&#39;</span><span class="p">),</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_add_template_filter_with_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">my_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">bp</span><span class="o">.</span><span class="n">add_app_template_filter</span><span class="p">(</span><span class="n">my_reverse</span><span class="p">,</span> <span class="s">&#39;strrev&#39;</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;strrev&#39;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;strrev&#39;</span><span class="p">],</span> <span class="n">my_reverse</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;strrev&#39;</span><span class="p">](</span><span class="s">&#39;abcd&#39;</span><span class="p">),</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_template_filter_with_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_filter</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">super_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_filter.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;abcd&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_template_filter_after_route_with_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_filter.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;abcd&#39;</span><span class="p">)</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_filter</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">super_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_add_template_filter_with_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">super_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">bp</span><span class="o">.</span><span class="n">add_app_template_filter</span><span class="p">(</span><span class="n">super_reverse</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_filter.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;abcd&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_template_filter_with_name_and_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_filter</span><span class="p">(</span><span class="s">&#39;super_reverse&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">my_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_filter.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;abcd&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_add_template_filter_with_name_and_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">my_reverse</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">s</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">bp</span><span class="o">.</span><span class="n">add_app_template_filter</span><span class="p">(</span><span class="n">my_reverse</span><span class="p">,</span> <span class="s">&#39;super_reverse&#39;</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_filter.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s">&#39;abcd&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;dcba&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_template_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_test</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">is_boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;is_boolean&#39;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="p">[</span><span class="s">&#39;is_boolean&#39;</span><span class="p">],</span> <span class="n">is_boolean</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="p">[</span><span class="s">&#39;is_boolean&#39;</span><span class="p">](</span><span class="bp">False</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_add_template_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">is_boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">bp</span><span class="o">.</span><span class="n">add_app_template_test</span><span class="p">(</span><span class="n">is_boolean</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;is_boolean&#39;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="p">[</span><span class="s">&#39;is_boolean&#39;</span><span class="p">],</span> <span class="n">is_boolean</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="p">[</span><span class="s">&#39;is_boolean&#39;</span><span class="p">](</span><span class="bp">False</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_template_test_with_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_test</span><span class="p">(</span><span class="s">&#39;boolean&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">is_boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;boolean&#39;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="p">[</span><span class="s">&#39;boolean&#39;</span><span class="p">],</span> <span class="n">is_boolean</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="p">[</span><span class="s">&#39;boolean&#39;</span><span class="p">](</span><span class="bp">False</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_add_template_test_with_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">is_boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">bp</span><span class="o">.</span><span class="n">add_app_template_test</span><span class="p">(</span><span class="n">is_boolean</span><span class="p">,</span> <span class="s">&#39;boolean&#39;</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;boolean&#39;</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="p">[</span><span class="s">&#39;boolean&#39;</span><span class="p">],</span> <span class="n">is_boolean</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">tests</span><span class="p">[</span><span class="s">&#39;boolean&#39;</span><span class="p">](</span><span class="bp">False</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">test_template_test_with_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_test</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_test.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;Success!&#39;</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_template_test_after_route_with_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_test.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_test</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;Success!&#39;</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_add_template_test_with_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">bp</span><span class="o">.</span><span class="n">add_app_template_test</span><span class="p">(</span><span class="n">boolean</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_test.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;Success!&#39;</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_template_test_with_name_and_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="nd">@bp.app_template_test</span><span class="p">(</span><span class="s">&#39;boolean&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">is_boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_test.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;Success!&#39;</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test_add_template_test_with_name_and_template</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Blueprint</span><span class="p">(</span><span class="s">&#39;bp&#39;</span><span class="p">,</span> <span class="n">__name__</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">is_boolean</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
+        <span class="n">bp</span><span class="o">.</span><span class="n">add_app_template_test</span><span class="p">(</span><span class="n">is_boolean</span><span class="p">,</span> <span class="s">&#39;boolean&#39;</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">flask</span><span class="o">.</span><span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">register_blueprint</span><span class="p">(</span><span class="n">bp</span><span class="p">,</span> <span class="n">url_prefix</span><span class="o">=</span><span class="s">&#39;/py&#39;</span><span class="p">)</span>
+        <span class="nd">@app.route</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">flask</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span><span class="s">&#39;template_test.html&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">test_client</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assert_</span><span class="p">(</span><span class="s">&#39;Success!&#39;</span> <span class="ow">in</span> <span class="n">rv</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">suite</span><span class="p">():</span>
+    <span class="n">suite</span> <span class="o">=</span> <span class="n">unittest</span><span class="o">.</span><span class="n">TestSuite</span><span class="p">()</span>
+    <span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">BlueprintTestCase</span><span class="p">))</span>
+    <span class="n">suite</span><span class="o">.</span><span class="n">addTest</span><span class="p">(</span><span class="n">unittest</span><span class="o">.</span><span class="n">makeSuite</span><span class="p">(</span><span class="n">ModuleTestCase</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">suite</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  
+</div>
+</body>

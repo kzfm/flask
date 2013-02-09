@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>helpers.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  
+  <div class='section'>
+    <div class='docs'><h1>helpers.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <pre><code>flask.helpers
+~~~~~~~~~~~~~
+
+Implements various helpers.
+
+:copyright: (c) 2011 by Armin Ronacher.
+:license: BSD, see LICENSE for more details.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pkgutil</span>
+<span class="kn">import</span> <span class="nn">posixpath</span>
+<span class="kn">import</span> <span class="nn">mimetypes</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">zlib</span> <span class="kn">import</span> <span class="n">adler32</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">RLock</span>
+<span class="kn">from</span> <span class="nn">werkzeug.routing</span> <span class="kn">import</span> <span class="n">BuildError</span>
+<span class="kn">from</span> <span class="nn">werkzeug.urls</span> <span class="kn">import</span> <span class="n">url_quote</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">update_wrapper</span>
+
+
+<span class="kn">from</span> <span class="nn">werkzeug.datastructures</span> <span class="kn">import</span> <span class="n">Headers</span>
+<span class="kn">from</span> <span class="nn">werkzeug.exceptions</span> <span class="kn">import</span> <span class="n">NotFound</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>this was moved in 0.7</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">werkzeug.wsgi</span> <span class="kn">import</span> <span class="n">wrap_file</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">werkzeug.utils</span> <span class="kn">import</span> <span class="n">wrap_file</span>
+
+<span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">FileSystemLoader</span>
+
+<span class="kn">from</span> <span class="nn">.globals</span> <span class="kn">import</span> <span class="n">session</span><span class="p">,</span> <span class="n">_request_ctx_stack</span><span class="p">,</span> <span class="n">_app_ctx_stack</span><span class="p">,</span> \
+     <span class="n">current_app</span><span class="p">,</span> <span class="n">request</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>sentinel</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">_missing</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>what separators does this operating system provide that are not a slash?
+this is used by the send_from_directory function to ensure that nobody is
+able to access files from outside the filesystem.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">_os_alt_seps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sep</span> <span class="k">for</span> <span class="n">sep</span> <span class="ow">in</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">altsep</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">sep</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s">&#39;/&#39;</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>Internal helper that returns the default endpoint for a given</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">_endpoint_from_view_func</span><span class="p">(</span><span class="n">view_func</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>function.  This always is the function name.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">assert</span> <span class="n">view_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&#39;expected view func if endpoint &#39;</span> \
+                                  <span class="s">&#39;is not provided.&#39;</span>
+    <span class="k">return</span> <span class="n">view_func</span><span class="o">.</span><span class="n">__name__</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>Request contexts disappear when the response is started on the server.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">stream_with_context</span><span class="p">(</span><span class="n">generator_or_function</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>This is done for efficiency reasons and to make it less likely to encounter
+memory leaks with badly written WSGI middlewares.  The downside is that if
+you are using streamed responses, the generator cannot access request bound
+information any more.</p>
+<p>This function however can help you keep the context around for longer::</p>
+<pre><code>from flask import stream_with_context, request, Response
+
+@app.route('/stream')
+def streamed_response():
+    @stream_with_context
+    def generate():
+        yield 'Hello '
+        yield request.args['name']
+        yield '!'
+    return Response(generate())
+</code></pre>
+<p>Alternatively it can also be used around a specific generator::</p>
+<pre><code>from flask import stream_with_context, request, Response
+
+@app.route('/stream')
+def streamed_response():
+    def generate():
+        yield 'Hello '
+        yield request.args['name']
+        yield '!'
+    return Response(stream_with_context(generate()))
+</code></pre>
+<p>.. versionadded:: 0.9</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">try</span><span class="p">:</span>
+        <span class="n">gen</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">generator_or_function</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">gen</span> <span class="o">=</span> <span class="n">generator_or_function</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">stream_with_context</span><span class="p">(</span><span class="n">gen</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">update_wrapper</span><span class="p">(</span><span class="n">decorator</span><span class="p">,</span> <span class="n">generator_or_function</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">generator</span><span class="p">():</span>
+        <span class="n">ctx</span> <span class="o">=</span> <span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">top</span>
+        <span class="k">if</span> <span class="n">ctx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Attempted to stream with context but &#39;</span>
+                <span class="s">&#39;there was no context in the first place to keep around.&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">ctx</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      <p>Dummy sentinel.  Has to be inside the context block or we're
+not actually keeping the context around.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">yield</span> <span class="bp">None</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>The try/finally is here so that if someone passes a WSGI level
+iterator in we're still running the cleanup logic.  Generators
+don't need that because they are closed on their destruction
+automatically.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">gen</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">item</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">gen</span><span class="p">,</span> <span class="s">&#39;close&#39;</span><span class="p">):</span>
+                    <span class="n">gen</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-12'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-12'>#</a>
+      </div>
+      <p>The trick is to start the generator.  Then the code execution runs until
+the first dummy None is yielded at which point the context was already
+pushed.  This item is discarded.  Then when the iteration continues the
+real generator is executed.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">wrapped_g</span> <span class="o">=</span> <span class="n">generator</span><span class="p">()</span>
+    <span class="n">wrapped_g</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">wrapped_g</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-13'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-13'>#</a>
+      </div>
+      <p>Sometimes it is necessary to set additional headers in a view.  Because</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">make_response</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-14'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-14'>#</a>
+      </div>
+      <p>views do not have to return response objects but can return a value that
+is converted into a response object by Flask itself, it becomes tricky to
+add headers to it.  This function can be called instead of using a return
+and you will get a response object which you can use to attach headers.</p>
+<p>If view looked like this and you want to add a new header::</p>
+<pre><code>def index():
+    return render_template('index.html', foo=42)
+</code></pre>
+<p>You can now do something like this::</p>
+<pre><code>def index():
+    response = make_response(render_template('index.html', foo=42))
+    response.headers['X-Parachutes'] = 'parachutes are cool'
+    return response
+</code></pre>
+<p>This function accepts the very same arguments you can return from a
+view function.  This for example creates a response with a 404 error
+code::</p>
+<pre><code>response = make_response(render_template('not_found.html'), 404)
+</code></pre>
+<p>The other use case of this function is to force the return value of a
+view function into a response which is helpful with view
+decorators::</p>
+<pre><code>response = make_response(view_function())
+response.headers['X-Parachutes'] = 'parachutes are cool'
+</code></pre>
+<p>Internally this function does the following things:</p>
+<ul>
+<li>if no arguments are passed, it creates a new response argument</li>
+<li>if one argument is passed, :meth:<code>flask.Flask.make_response</code>
+    is invoked with it.</li>
+<li>if more than one argument is passed, the arguments are passed
+    to the :meth:<code>flask.Flask.make_response</code> function as tuple.</li>
+</ul>
+<p>.. versionadded:: 0.6</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">current_app</span><span class="o">.</span><span class="n">response_class</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">current_app</span><span class="o">.</span><span class="n">make_response</span><span class="p">(</span><span class="n">args</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-15'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-15'>#</a>
+      </div>
+      <p>Generates a URL to the given endpoint with the method provided.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">url_for</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="o">**</span><span class="n">values</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-16'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-16'>#</a>
+      </div>
+      <p>Variable arguments that are unknown to the target endpoint are appended
+to the generated URL as query arguments.  If the value of a query argument
+is <code>None</code>, the whole pair is skipped.  In case blueprints are active
+you can shortcut references to the same blueprint by prefixing the
+local endpoint with a dot (<code>.</code>).</p>
+<p>This will reference the index function local to the current blueprint::</p>
+<pre><code>url_for('.index')
+</code></pre>
+<p>For more information, head over to the :ref:<code>Quickstart &lt;url-building&gt;</code>.</p>
+<p>To integrate applications, :class:<code>Flask</code> has a hook to intercept URL build
+errors through :attr:<code>Flask.build_error_handler</code>.  The <code>url_for</code> function
+results in a :exc:<code>~werkzeug.routing.BuildError</code> when the current app does
+not have a URL for the given endpoint and values.  When it does, the
+:data:<code>~flask.current_app</code> calls its :attr:<code>~Flask.build_error_handler</code> if
+it is not <code>None</code>, which can return a string to use as the result of
+<code>url_for</code> (instead of <code>url_for</code>'s default to raise the
+:exc:<code>~werkzeug.routing.BuildError</code> exception) or re-raise the exception.
+An example::</p>
+<pre><code>def external_url_handler(error, endpoint, **values):
+    "Looks up an external URL when `url_for` cannot build a URL."
+    # This is an example of hooking the build_error_handler.
+    # Here, lookup_url is some utility function you've built
+    # which looks up the endpoint in some external URL registry.
+    url = lookup_url(endpoint, **values)
+    if url is None:
+        # External lookup did not have a URL.
+        # Re-raise the BuildError, in context of original traceback.
+        exc_type, exc_value, tb = sys.exc_info()
+        if exc_value is error:
+            raise exc_type, exc_value, tb
+        else:
+            raise error
+    # url_for will use this result, instead of raising BuildError.
+    return url
+
+app.build_error_handler = external_url_handler
+</code></pre>
+<p>Here, <code>error</code> is the instance of :exc:<code>~werkzeug.routing.BuildError</code>, and
+<code>endpoint</code> and <code>**values</code> are the arguments passed into <code>url_for</code>.  Note
+that this is for building URLs outside the current application, and not for
+handling 404 NotFound errors.</p>
+<p>.. versionadded:: 0.10
+   The <code>_scheme</code> parameter was added.</p>
+<p>.. versionadded:: 0.9
+   The <code>_anchor</code> and <code>_method</code> parameters were added.</p>
+<p>.. versionadded:: 0.9
+   Calls :meth:<code>Flask.handle_build_error</code> on
+   :exc:<code>~werkzeug.routing.BuildError</code>.</p>
+<p>:param endpoint: the endpoint of the URL (name of the function)
+:param values: the variable arguments of the URL rule
+:param _external: if set to <code>True</code>, an absolute URL is generated. Server
+  address can be changed via <code>SERVER_NAME</code> configuration variable which
+  defaults to <code>localhost</code>.
+:param _scheme: a string specifying the desired URL scheme. The <code>_external</code>
+  parameter must be set to <code>True</code> or a <code>ValueError</code> is raised.
+:param _anchor: if provided this is added as anchor to the URL.
+:param _method: if provided this explicitly specifies an HTTP method.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">appctx</span> <span class="o">=</span> <span class="n">_app_ctx_stack</span><span class="o">.</span><span class="n">top</span>
+    <span class="n">reqctx</span> <span class="o">=</span> <span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">top</span>
+    <span class="k">if</span> <span class="n">appctx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Attempted to generate a URL without the &#39;</span>
+                           <span class="s">&#39;application context being pushed. This has to be &#39;</span>
+                           <span class="s">&#39;executed when application context is available.&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-17'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-17'>#</a>
+      </div>
+      <p>If request specific information is available we have some extra
+features that support "relative" urls.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">reqctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">url_adapter</span> <span class="o">=</span> <span class="n">reqctx</span><span class="o">.</span><span class="n">url_adapter</span>
+        <span class="n">blueprint_name</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">blueprint</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">reqctx</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">_is_old_module</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">endpoint</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;.&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">blueprint_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">blueprint_name</span> <span class="o">+</span> <span class="n">endpoint</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-18'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-18'>#</a>
+      </div>
+      <p>TODO: get rid of this deprecated functionality in 1.0</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="s">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">endpoint</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">blueprint_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">endpoint</span> <span class="o">=</span> <span class="n">blueprint_name</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">endpoint</span>
+            <span class="k">elif</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">):</span>
+                <span class="n">endpoint</span> <span class="o">=</span> <span class="n">endpoint</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">external</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;_external&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-19'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-19'>#</a>
+      </div>
+      <p>Otherwise go with the url adapter from the appctx and make
+the urls external by default.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">else</span><span class="p">:</span>
+        <span class="n">url_adapter</span> <span class="o">=</span> <span class="n">appctx</span><span class="o">.</span><span class="n">url_adapter</span>
+        <span class="k">if</span> <span class="n">url_adapter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Application was not able to create a URL &#39;</span>
+                               <span class="s">&#39;adapter for request independent URL generation. &#39;</span>
+                               <span class="s">&#39;You might be able to fix this by setting &#39;</span>
+                               <span class="s">&#39;the SERVER_NAME config variable.&#39;</span><span class="p">)</span>
+        <span class="n">external</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;_external&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">anchor</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;_anchor&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;_method&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">scheme</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;_scheme&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">appctx</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">inject_url_defaults</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">scheme</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">external</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;When specifying _scheme, _external must be True&#39;</span><span class="p">)</span>
+        <span class="n">url_adapter</span><span class="o">.</span><span class="n">url_scheme</span> <span class="o">=</span> <span class="n">scheme</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">url_adapter</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                               <span class="n">force_external</span><span class="o">=</span><span class="n">external</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">BuildError</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-20'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-20'>#</a>
+      </div>
+      <p>We need to inject the values again so that the app callback can
+deal with that sort of stuff.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">values</span><span class="p">[</span><span class="s">&#39;_external&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">external</span>
+        <span class="n">values</span><span class="p">[</span><span class="s">&#39;_anchor&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">anchor</span>
+        <span class="n">values</span><span class="p">[</span><span class="s">&#39;_method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="k">return</span> <span class="n">appctx</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">handle_url_build_error</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">endpoint</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">anchor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">rv</span> <span class="o">+=</span> <span class="s">&#39;#&#39;</span> <span class="o">+</span> <span class="n">url_quote</span><span class="p">(</span><span class="n">anchor</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rv</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-21'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-21'>#</a>
+      </div>
+      <p>Loads a macro (or variable) a template exports.  This can be used to</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_template_attribute</span><span class="p">(</span><span class="n">template_name</span><span class="p">,</span> <span class="n">attribute</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-22'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-22'>#</a>
+      </div>
+      <p>invoke a macro from within Python code.  If you for example have a
+template named <code>_cider.html</code> with the following contents:</p>
+<p>.. sourcecode:: html+jinja</p>
+<p>{% macro hello(name) %}Hello !{% endmacro %}</p>
+<p>You can access this from Python code like this::</p>
+<pre><code>hello = get_template_attribute('_cider.html', 'hello')
+return hello('World')
+</code></pre>
+<p>.. versionadded:: 0.2</p>
+<p>:param template_name: the name of the template
+:param attribute: the name of the variable of macro to acccess</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current_app</span><span class="o">.</span><span class="n">jinja_env</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="n">template_name</span><span class="p">)</span><span class="o">.</span><span class="n">module</span><span class="p">,</span>
+                   <span class="n">attribute</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-23'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-23'>#</a>
+      </div>
+      <p>Flashes a message to the next request.  In order to remove the</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">flash</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="s">&#39;message&#39;</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-24'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-24'>#</a>
+      </div>
+      <p>flashed message from the session and to display it to the user,
+the template has to call :func:<code>get_flashed_messages</code>.</p>
+<p>.. versionchanged:: 0.3
+   <code>category</code> parameter added.</p>
+<p>:param message: the message to be flashed.
+:param category: the category for the message.  The following values
+                 are recommended: <code>'message'</code> for any kind of message,
+                 <code>'error'</code> for errors, <code>'info'</code> for information
+                 messages and <code>'warning'</code> for warnings.  However any
+                 kind of string can be used as category.</p>
+<p>Original implementation:</p>
+<pre><code>session.setdefault('_flashes', []).append((category, message))
+</code></pre>
+<p>This assumed that changes made to mutable structures in the session are
+are always in sync with the sess on object, which is not true for session
+implementations that use external storage for keeping their keys/values.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">flashes</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;_flashes&#39;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="n">flashes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">category</span><span class="p">,</span> <span class="n">message</span><span class="p">))</span>
+    <span class="n">session</span><span class="p">[</span><span class="s">&#39;_flashes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flashes</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-25'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-25'>#</a>
+      </div>
+      <p>Pulls all flashed messages from the session and returns them.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_flashed_messages</span><span class="p">(</span><span class="n">with_categories</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">category_filter</span><span class="o">=</span><span class="p">[]):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-26'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-26'>#</a>
+      </div>
+      <p>Further calls in the same request to the function will return
+the same messages.  By default just the messages are returned,
+but when <code>with_categories</code> is set to <code>True</code>, the return value will
+be a list of tuples in the form <code>(category, message)</code> instead.</p>
+<p>Filter the flashed messages to one or more categories by providing those
+categories in <code>category_filter</code>.  This allows rendering categories in
+separate html blocks.  The <code>with_categories</code> and <code>category_filter</code>
+arguments are distinct:</p>
+<ul>
+<li><code>with_categories</code> controls whether categories are returned with message
+  text (<code>True</code> gives a tuple, where <code>False</code> gives just the message text).</li>
+<li><code>category_filter</code> filters the messages down to only those matching the
+  provided categories.</li>
+</ul>
+<p>See :ref:<code>message-flashing-pattern</code> for examples.</p>
+<p>.. versionchanged:: 0.3
+   <code>with_categories</code> parameter added.</p>
+<p>.. versionchanged:: 0.9
+    <code>category_filter</code> parameter added.</p>
+<p>:param with_categories: set to <code>True</code> to also receive categories.
+:param category_filter: whitelist of categories to limit return values</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">flashes</span> <span class="o">=</span> <span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">flashes</span>
+    <span class="k">if</span> <span class="n">flashes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">top</span><span class="o">.</span><span class="n">flashes</span> <span class="o">=</span> <span class="n">flashes</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;_flashes&#39;</span><span class="p">)</span> \
+            <span class="k">if</span> <span class="s">&#39;_flashes&#39;</span> <span class="ow">in</span> <span class="n">session</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">category_filter</span><span class="p">:</span>
+        <span class="n">flashes</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">category_filter</span><span class="p">,</span> <span class="n">flashes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">with_categories</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">flashes</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">flashes</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-27'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-27'>#</a>
+      </div>
+      <p>Sends the contents of a file to the client.  This will use the</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">send_file</span><span class="p">(</span><span class="n">filename_or_fp</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">as_attachment</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="n">attachment_filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">add_etags</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+              <span class="n">cache_timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">conditional</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-28'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-28'>#</a>
+      </div>
+      <p>most efficient method available and configured.  By default it will
+try to use the WSGI server's file_wrapper support.  Alternatively
+you can set the application's :attr:<code>~Flask.use_x_sendfile</code> attribute
+to <code>True</code> to directly emit an <code>X-Sendfile</code> header.  This however
+requires support of the underlying webserver for <code>X-Sendfile</code>.</p>
+<p>By default it will try to guess the mimetype for you, but you can
+also explicitly provide one.  For extra security you probably want
+to send certain files as attachment (HTML for instance).  The mimetype
+guessing requires a <code>filename</code> or an <code>attachment_filename</code> to be
+provided.</p>
+<p>Please never pass filenames to this function from user sources without
+checking them first.  Something like this is usually sufficient to
+avoid security problems::</p>
+<pre><code>if '..' in filename or filename.startswith('/'):
+    abort(404)
+</code></pre>
+<p>.. versionadded:: 0.2</p>
+<p>.. versionadded:: 0.5
+   The <code>add_etags</code>, <code>cache_timeout</code> and <code>conditional</code> parameters were
+   added.  The default behavior is now to attach etags.</p>
+<p>.. versionchanged:: 0.7
+   mimetype guessing and etag support for file objects was
+   deprecated because it was unreliable.  Pass a filename if you are
+   able to, otherwise attach an etag yourself.  This functionality
+   will be removed in Flask 1.0</p>
+<p>.. versionchanged:: 0.9
+   cache_timeout pulls its default from application config, when None.</p>
+<p>:param filename_or_fp: the filename of the file to send.  This is
+                       relative to the :attr:<code>~Flask.root_path</code> if a
+                       relative path is specified.
+                       Alternatively a file object might be provided
+                       in which case <code>X-Sendfile</code> might not work and
+                       fall back to the traditional method.  Make sure
+                       that the file pointer is positioned at the start
+                       of data to send before calling :func:<code>send_file</code>.
+:param mimetype: the mimetype of the file if provided, otherwise
+                 auto detection happens.
+:param as_attachment: set to <code>True</code> if you want to send this file with
+                      a <code>Content-Disposition: attachment</code> header.
+:param attachment_filename: the filename for the attachment if it
+                            differs from the file's filename.
+:param add_etags: set to <code>False</code> to disable attaching of etags.
+:param conditional: set to <code>True</code> to enable conditional responses.</p>
+<p>:param cache_timeout: the timeout in seconds for the headers. When <code>None</code>
+                      (default), this value is set by
+                      :meth:<code>~Flask.get_send_file_max_age</code> of
+                      :data:<code>~flask.current_app</code>.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mtime</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename_or_fp</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">filename_or_fp</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+        <span class="nb">file</span> <span class="o">=</span> <span class="n">filename_or_fp</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">file</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-29'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-29'>#</a>
+      </div>
+      <p>XXX: this behavior is now deprecated because it was unreliable.
+removed in Flask 1.0</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="ow">not</span> <span class="n">attachment_filename</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">mimetype</span> \
+           <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s">&#39;The filename support for file objects &#39;</span>
+                <span class="s">&#39;passed to send_file is now deprecated.  Pass an &#39;</span>
+                <span class="s">&#39;attach_filename if you want mimetypes to be guessed.&#39;</span><span class="p">),</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">add_etags</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="ne">DeprecationWarning</span><span class="p">(</span><span class="s">&#39;In future flask releases etags will no &#39;</span>
+                <span class="s">&#39;longer be generated for file objects passed to the send_file &#39;</span>
+                <span class="s">&#39;function because this behavior was unreliable.  Pass &#39;</span>
+                <span class="s">&#39;filenames instead if possible, otherwise attach an etag &#39;</span>
+                <span class="s">&#39;yourself based on another value&#39;</span><span class="p">),</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_app</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mimetype</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">filename</span> <span class="ow">or</span> <span class="n">attachment_filename</span><span class="p">):</span>
+        <span class="n">mimetype</span> <span class="o">=</span> <span class="n">mimetypes</span><span class="o">.</span><span class="n">guess_type</span><span class="p">(</span><span class="n">filename</span> <span class="ow">or</span> <span class="n">attachment_filename</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">mimetype</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">mimetype</span> <span class="o">=</span> <span class="s">&#39;application/octet-stream&#39;</span>
+
+    <span class="n">headers</span> <span class="o">=</span> <span class="n">Headers</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">as_attachment</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">attachment_filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;filename unavailable, required for &#39;</span>
+                                <span class="s">&#39;sending as attachment&#39;</span><span class="p">)</span>
+            <span class="n">attachment_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">headers</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s">&#39;Content-Disposition&#39;</span><span class="p">,</span> <span class="s">&#39;attachment&#39;</span><span class="p">,</span>
+                    <span class="n">filename</span><span class="o">=</span><span class="n">attachment_filename</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">current_app</span><span class="o">.</span><span class="n">use_x_sendfile</span> <span class="ow">and</span> <span class="n">filename</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">headers</span><span class="p">[</span><span class="s">&#39;X-Sendfile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="n">headers</span><span class="p">[</span><span class="s">&#39;Content-Length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">file</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">)</span>
+            <span class="n">mtime</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">wrap_file</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">environ</span><span class="p">,</span> <span class="nb">file</span><span class="p">)</span>
+
+    <span class="n">rv</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">response_class</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mimetype</span><span class="o">=</span><span class="n">mimetype</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span>
+                                    <span class="n">direct_passthrough</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-30'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-30'>#</a>
+      </div>
+      <p>if we know the file modification date, we can store it as the
+the time of the last modification.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">mtime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">rv</span><span class="o">.</span><span class="n">last_modified</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mtime</span><span class="p">)</span>
+
+    <span class="n">rv</span><span class="o">.</span><span class="n">cache_control</span><span class="o">.</span><span class="n">public</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="n">cache_timeout</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">cache_timeout</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">get_send_file_max_age</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cache_timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">rv</span><span class="o">.</span><span class="n">cache_control</span><span class="o">.</span><span class="n">max_age</span> <span class="o">=</span> <span class="n">cache_timeout</span>
+        <span class="n">rv</span><span class="o">.</span><span class="n">expires</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="n">cache_timeout</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">add_etags</span> <span class="ow">and</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">rv</span><span class="o">.</span><span class="n">set_etag</span><span class="p">(</span><span class="s">&#39;flask-</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">filename</span><span class="p">),</span>
+            <span class="n">adler32</span><span class="p">(</span>
+                <span class="n">filename</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">)</span>
+                <span class="k">else</span> <span class="n">filename</span>
+            <span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="p">))</span>
+        <span class="k">if</span> <span class="n">conditional</span><span class="p">:</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">make_conditional</span><span class="p">(</span><span class="n">request</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-31'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-31'>#</a>
+      </div>
+      <p>make sure we don't send x-sendfile for servers that
+ignore the 304 status code for x-sendfile.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">304</span><span class="p">:</span>
+                <span class="n">rv</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;x-sendfile&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rv</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-32'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-32'>#</a>
+      </div>
+      <p>Safely join <code>directory</code> and <code>filename</code>.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">safe_join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-33'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-33'>#</a>
+      </div>
+      <p>Example usage::</p>
+<pre><code>@app.route('/wiki/&lt;path:filename&gt;')
+def wiki_page(filename):
+    filename = safe_join(app.config['WIKI_FOLDER'], filename)
+    with open(filename, 'rb') as fd:
+        content = fd.read() # Read and process the file content...
+</code></pre>
+<p>:param directory: the base directory.
+:param filename: the untrusted filename relative to that directory.
+:raises: :class:<code>~werkzeug.exceptions.NotFound</code> if the resulting path
+         would fall out of <code>directory</code>.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">filename</span> <span class="o">=</span> <span class="n">posixpath</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">sep</span> <span class="ow">in</span> <span class="n">_os_alt_seps</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sep</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NotFound</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isabs</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="ow">or</span> \
+       <span class="n">filename</span> <span class="o">==</span> <span class="s">&#39;..&#39;</span> <span class="ow">or</span> \
+       <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;../&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">NotFound</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-34'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-34'>#</a>
+      </div>
+      <p>Send a file from a given directory with :func:<code>send_file</code>.  This</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">send_from_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-35'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-35'>#</a>
+      </div>
+      <p>is a secure way to quickly expose static files from an upload folder
+or something similar.</p>
+<p>Example usage::</p>
+<pre><code>@app.route('/uploads/&lt;path:filename&gt;')
+def download_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename, as_attachment=True)
+</code></pre>
+<p>.. admonition:: Sending files and Performance</p>
+<p>It is strongly recommended to activate either <code>X-Sendfile</code> support in
+   your webserver or (if no authentication happens) to tell the webserver
+   to serve files for the given path on its own without calling into the
+   web application for improved performance.</p>
+<p>.. versionadded:: 0.5</p>
+<p>:param directory: the directory where all the files are stored.
+:param filename: the filename relative to that directory to
+                 download.
+:param options: optional keyword arguments that are directly
+                forwarded to :func:<code>send_file</code>.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">filename</span> <span class="o">=</span> <span class="n">safe_join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">NotFound</span><span class="p">()</span>
+    <span class="n">options</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;conditional&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">send_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">options</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-36'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-36'>#</a>
+      </div>
+      <p>Returns the path to a package or cwd if that cannot be found.  This</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">get_root_path</span><span class="p">(</span><span class="n">import_name</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-37'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-37'>#</a>
+      </div>
+      <p>returns the path of a package or the folder that contains a module.</p>
+<p>Not to be confused with the package path returned by :func:<code>find_package</code>.</p>
+<p>Module already imported and has a file attribute.  Use that first.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">mod</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">import_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mod</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span> <span class="s">&#39;__file__&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">mod</span><span class="o">.</span><span class="n">__file__</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-38'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-38'>#</a>
+      </div>
+      <p>Next attempt: check the loader.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">loader</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_loader</span><span class="p">(</span><span class="n">import_name</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-39'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-39'>#</a>
+      </div>
+      <p>Loader does not exist or we're referring to an unloaded main module
+or a main module without path (interactive sessions), go with the
+current working directory.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="n">loader</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">import_name</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-40'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-40'>#</a>
+      </div>
+      <p>For .egg, zipimporter does not have get_filename until Python 2.7.
+Some other loaders might exhibit the same behavior.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="s">&#39;get_filename&#39;</span><span class="p">):</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_filename</span><span class="p">(</span><span class="n">import_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-41'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-41'>#</a>
+      </div>
+      <p>Fall back to imports.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="nb">__import__</span><span class="p">(</span><span class="n">import_name</span><span class="p">)</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">import_name</span><span class="p">]</span><span class="o">.</span><span class="n">__file__</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-42'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-42'>#</a>
+      </div>
+      <p>filepath is import_name.py for a module, or <strong>init</strong>.py for a package.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">filepath</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-43'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-43'>#</a>
+      </div>
+      <p>Finds a package and returns the prefix (or None if the package is</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">find_package</span><span class="p">(</span><span class="n">import_name</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-44'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-44'>#</a>
+      </div>
+      <p>not installed) as well as the folder that contains the package or
+module as a tuple.  The package path returned is the module that would
+have to be added to the pythonpath in order to make it possible to
+import the module.  The prefix is the path below which a UNIX like
+folder structure exists (lib, share etc.).</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">root_mod_name</span> <span class="o">=</span> <span class="n">import_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">loader</span> <span class="o">=</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_loader</span><span class="p">(</span><span class="n">root_mod_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">loader</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">import_name</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-45'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-45'>#</a>
+      </div>
+      <p>import name is not found, or interactive/main module</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">package_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-46'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-46'>#</a>
+      </div>
+      <p>For .egg, zipimporter does not have get_filename until Python 2.7.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="s">&#39;get_filename&#39;</span><span class="p">):</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">get_filename</span><span class="p">(</span><span class="n">root_mod_name</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">loader</span><span class="p">,</span> <span class="s">&#39;archive&#39;</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-47'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-47'>#</a>
+      </div>
+      <p>zipimporter's loader.archive points to the .egg or .zip
+archive filename is dropped in call to dirname below.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">filename</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">archive</span>
+        <span class="k">else</span><span class="p">:</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-48'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-48'>#</a>
+      </div>
+      <p>At least one loader is missing both get_filename and archive:
+Google App Engine's HardenedModulesHook</p>
+<p>Fall back to imports.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="nb">__import__</span><span class="p">(</span><span class="n">import_name</span><span class="p">)</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">import_name</span><span class="p">]</span><span class="o">.</span><span class="n">__file__</span>
+        <span class="n">package_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-49'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-49'>#</a>
+      </div>
+      <p>package_path ends with <strong>init</strong>.py for a package</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">loader</span><span class="o">.</span><span class="n">is_package</span><span class="p">(</span><span class="n">root_mod_name</span><span class="p">):</span>
+            <span class="n">package_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">package_path</span><span class="p">)</span>
+
+    <span class="n">site_parent</span><span class="p">,</span> <span class="n">site_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">package_path</span><span class="p">)</span>
+    <span class="n">py_prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">package_path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">py_prefix</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">py_prefix</span><span class="p">,</span> <span class="n">package_path</span>
+    <span class="k">elif</span> <span class="n">site_folder</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;site-packages&#39;</span><span class="p">:</span>
+        <span class="n">parent</span><span class="p">,</span> <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">site_parent</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-50'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-50'>#</a>
+      </div>
+      <p>Windows like installations</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">folder</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;lib&#39;</span><span class="p">:</span>
+            <span class="n">base_dir</span> <span class="o">=</span> <span class="n">parent</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-51'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-51'>#</a>
+      </div>
+      <p>UNIX like installations</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;lib&#39;</span><span class="p">:</span>
+            <span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">base_dir</span> <span class="o">=</span> <span class="n">site_parent</span>
+        <span class="k">return</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">package_path</span>
+    <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="n">package_path</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-52'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-52'>#</a>
+      </div>
+      <p>A decorator that converts a function into a lazy property.  The</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">locked_cached_property</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-53'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-53'>#</a>
+      </div>
+      <p>function wrapped is called the first time to retrieve the result
+and then that calculated result is used the next time you access
+the value.  Works like the one in Werkzeug but has a lock for
+thread safety.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-54'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-54'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">func</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__module__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__module__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">doc</span> <span class="ow">or</span> <span class="n">func</span><span class="o">.</span><span class="n">__doc__</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">func</span> <span class="o">=</span> <span class="n">func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">RLock</span><span class="p">()</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-55'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-55'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__get__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">_missing</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">_missing</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="n">value</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-56'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-56'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">_PackageBoundObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-57'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-57'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">import_name</span><span class="p">,</span> <span class="n">template_folder</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-58'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-58'>#</a>
+      </div>
+      <p>: The name of the package or module.  Do not change this once
+: it was set by the constructor.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">import_name</span> <span class="o">=</span> <span class="n">import_name</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-59'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-59'>#</a>
+      </div>
+      <p>: location of the templates.  <code>None</code> if templates should not be
+: exposed.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">template_folder</span> <span class="o">=</span> <span class="n">template_folder</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-60'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-60'>#</a>
+      </div>
+      <p>: Where is the app root located?</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="bp">self</span><span class="o">.</span><span class="n">root_path</span> <span class="o">=</span> <span class="n">get_root_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">import_name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_static_folder</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_static_url_path</span> <span class="o">=</span> <span class="bp">None</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-61'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-61'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_get_static_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_folder</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-62'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-62'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_set_static_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_static_folder</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">static_folder</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_static_folder</span><span class="p">,</span> <span class="n">_set_static_folder</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">_get_static_folder</span><span class="p">,</span> <span class="n">_set_static_folder</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-63'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-63'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_get_static_url_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_url_path</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_folder</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">return</span> <span class="s">&#39;/&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_folder</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_static_url_path</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-64'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-64'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">_set_static_url_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_static_url_path</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="n">static_url_path</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">_get_static_url_path</span><span class="p">,</span> <span class="n">_set_static_url_path</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">_get_static_url_path</span><span class="p">,</span> <span class="n">_set_static_url_path</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-65'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-65'>#</a>
+      </div>
+      <p>This is <code>True</code> if the package bound object's container has a</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">has_static_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-66'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-66'>#</a>
+      </div>
+      <p>folder named <code>'static'</code>.</p>
+<p>.. versionadded:: 0.5</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-67'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-67'>#</a>
+      </div>
+      <p>The Jinja loader for this package bound object.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@locked_cached_property</span>
+    <span class="k">def</span> <span class="nf">jinja_loader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-68'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-68'>#</a>
+      </div>
+      <p>.. versionadded:: 0.5</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">template_folder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">template_folder</span><span class="p">))</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-69'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-69'>#</a>
+      </div>
+      <p>Provides default cache_timeout for the :func:<code>send_file</code> functions.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">get_send_file_max_age</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-70'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-70'>#</a>
+      </div>
+      <p>By default, this function returns <code>SEND_FILE_MAX_AGE_DEFAULT</code> from
+the configuration of :data:<code>~flask.current_app</code>.</p>
+<p>Static file functions such as :func:<code>send_from_directory</code> use this
+function, and :func:<code>send_file</code> calls this function on
+:data:<code>~flask.current_app</code> when the given cache_timeout is <code>None</code>. If a
+cache_timeout is given in :func:<code>send_file</code>, that timeout is used;
+otherwise, this method is called.</p>
+<p>This allows subclasses to change the behavior when sending files based
+on the filename.  For example, to set the cache timeout for .js files
+to 60 seconds::</p>
+<pre><code>class MyFlask(flask.Flask):
+    def get_send_file_max_age(self, name):
+        if name.lower().endswith('.js'):
+            return 60
+        return flask.Flask.get_send_file_max_age(self, name)
+</code></pre>
+<p>.. versionadded:: 0.9</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">return</span> <span class="n">current_app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s">&#39;SEND_FILE_MAX_AGE_DEFAULT&#39;</span><span class="p">]</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-71'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-71'>#</a>
+      </div>
+      <p>Function used internally to send static files from the static</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">send_static_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-72'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-72'>#</a>
+      </div>
+      <p>folder to the browser.</p>
+<p>.. versionadded:: 0.5</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_static_folder</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;No static folder for this object&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-73'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-73'>#</a>
+      </div>
+      <p>Ensure get_send_file_max_age is called in all cases.
+Here, we ensure get_send_file_max_age is called for Blueprints.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">cache_timeout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_send_file_max_age</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">send_from_directory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_folder</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span>
+                                   <span class="n">cache_timeout</span><span class="o">=</span><span class="n">cache_timeout</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-74'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-74'>#</a>
+      </div>
+      <p>Opens a resource from the application's resource folder.  To see</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">open_resource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resource</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s">&#39;rb&#39;</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-75'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-75'>#</a>
+      </div>
+      <p>how this works, consider the following folder structure::</p>
+<pre><code>/myapplication.py
+/schema.sql
+/static
+    /style.css
+/templates
+    /layout.html
+    /index.html
+</code></pre>
+<p>If you want to open the <code>schema.sql</code> file you would do the
+following::</p>
+<pre><code>with app.open_resource('schema.sql') as f:
+    contents = f.read()
+    do_something_with(contents)
+</code></pre>
+<p>:param resource: the name of the resource.  To access resources within
+                 subfolders use forward slashes as separator.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="n">mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="s">&#39;rb&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Resources can only be opened for reading&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_path</span><span class="p">,</span> <span class="n">resource</span><span class="p">),</span> <span class="n">mode</span><span class="p">)</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  
+</div>
+</body>

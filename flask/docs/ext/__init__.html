@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>__init__.py</title>
+  <link rel="stylesheet" href="../pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  
+  <div class='section'>
+    <div class='docs'><h1>__init__.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <pre><code>flask.ext
+~~~~~~~~~
+
+Redirect imports for extensions.  This module basically makes it possible
+for us to transition from flaskext.foo to flask_foo without having to
+force all extensions to upgrade at the same time.
+
+When a user does ``from flask.ext.foo import bar`` it will attempt to
+import ``from flask_foo import bar`` first and when that fails it will
+try to import ``from flaskext.foo import bar``.
+
+We're switching from namespace packages because it was just too painful for
+everybody involved.
+
+:copyright: (c) 2011 by Armin Ronacher.
+:license: BSD, see LICENSE for more details.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">setup</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">..exthook</span> <span class="kn">import</span> <span class="n">ExtensionImporter</span>
+    <span class="n">importer</span> <span class="o">=</span> <span class="n">ExtensionImporter</span><span class="p">([</span><span class="s">&#39;flask_</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;flaskext.</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">],</span> <span class="n">__name__</span><span class="p">)</span>
+    <span class="n">importer</span><span class="o">.</span><span class="n">install</span><span class="p">()</span>
+
+
+<span class="n">setup</span><span class="p">()</span>
+<span class="k">del</span> <span class="n">setup</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  
+</div>
+</body>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>__init__.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  
+  <div class='section'>
+    <div class='docs'><h1>__init__.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <pre><code>flask
+~~~~~
+
+A microframework based on Werkzeug.  It's extensively documented
+and follows best practice patterns.
+
+:copyright: (c) 2011 by Armin Ronacher.
+:license: BSD, see LICENSE for more details.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.10-dev&#39;</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>utilities we import from Werkzeug and Jinja2 that are unused
+in the module but are exported as public interface.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">werkzeug.exceptions</span> <span class="kn">import</span> <span class="n">abort</span>
+<span class="kn">from</span> <span class="nn">werkzeug.utils</span> <span class="kn">import</span> <span class="n">redirect</span>
+<span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">Markup</span><span class="p">,</span> <span class="n">escape</span>
+
+<span class="kn">from</span> <span class="nn">.app</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">Config</span>
+<span class="kn">from</span> <span class="nn">.helpers</span> <span class="kn">import</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span> <span class="n">send_file</span><span class="p">,</span> <span class="n">send_from_directory</span><span class="p">,</span> \
+    <span class="n">get_flashed_messages</span><span class="p">,</span> <span class="n">get_template_attribute</span><span class="p">,</span> <span class="n">make_response</span><span class="p">,</span> <span class="n">safe_join</span><span class="p">,</span> \
+    <span class="n">stream_with_context</span>
+<span class="kn">from</span> <span class="nn">.globals</span> <span class="kn">import</span> <span class="n">current_app</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">_request_ctx_stack</span><span class="p">,</span> \
+     <span class="n">_app_ctx_stack</span>
+<span class="kn">from</span> <span class="nn">.ctx</span> <span class="kn">import</span> <span class="n">has_request_context</span><span class="p">,</span> <span class="n">has_app_context</span><span class="p">,</span> \
+     <span class="n">after_this_request</span>
+<span class="kn">from</span> <span class="nn">.module</span> <span class="kn">import</span> <span class="n">Module</span>
+<span class="kn">from</span> <span class="nn">.blueprints</span> <span class="kn">import</span> <span class="n">Blueprint</span>
+<span class="kn">from</span> <span class="nn">.templating</span> <span class="kn">import</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">render_template_string</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      <p>the signals</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">.signals</span> <span class="kn">import</span> <span class="n">signals_available</span><span class="p">,</span> <span class="n">template_rendered</span><span class="p">,</span> <span class="n">request_started</span><span class="p">,</span> \
+     <span class="n">request_finished</span><span class="p">,</span> <span class="n">got_request_exception</span><span class="p">,</span> <span class="n">request_tearing_down</span><span class="p">,</span> \
+     <span class="n">appcontext_tearing_down</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>We're not exposing the actual json module but a convenient wrapper around
+it.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">json</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>This was the only thing that flask used to export at one point and it had
+a more generic name.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="n">jsonify</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">jsonify</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>backwards compat, goes away in 1.0</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">.sessions</span> <span class="kn">import</span> <span class="n">SecureCookieSession</span> <span class="k">as</span> <span class="n">Session</span>
+<span class="n">json_available</span> <span class="o">=</span> <span class="bp">True</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  
+</div>
+</body>

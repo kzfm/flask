@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8">
+  <title>testing.py</title>
+  <link rel="stylesheet" href="pycco.css">
+</head>
+<body>
+<div id='container'>
+  <div id="background"></div>
+  
+  <div class='section'>
+    <div class='docs'><h1>testing.py</h1></div>
+  </div>
+  <div class='clearall'>
+  <div class='section' id='section-0'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-0'>#</a>
+      </div>
+      <pre><code>flask.testing
+~~~~~~~~~~~~~
+
+Implements test support helpers.  This module is lazily imported
+and usually not used in production environments.
+
+:copyright: (c) 2011 by Armin Ronacher.
+:license: BSD, see LICENSE for more details.
+</code></pre>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">with_statement</span>
+
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">werkzeug.test</span> <span class="kn">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">EnvironBuilder</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">_request_ctx_stack</span>
+<span class="kn">from</span> <span class="nn">urlparse</span> <span class="kn">import</span> <span class="n">urlparse</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-1'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-1'>#</a>
+      </div>
+      <p>Creates a new test builder with some application defaults thrown in.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">def</span> <span class="nf">make_test_environ_builder</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s">&#39;/&#39;</span><span class="p">,</span> <span class="n">base_url</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-2'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-2'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">http_host</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;SERVER_NAME&#39;</span><span class="p">)</span>
+    <span class="n">app_root</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;APPLICATION_ROOT&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">base_url</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">base_url</span> <span class="o">=</span> <span class="s">&#39;http://</span><span class="si">%s</span><span class="s">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">netloc</span> <span class="ow">or</span> <span class="n">http_host</span> <span class="ow">or</span> <span class="s">&#39;localhost&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">app_root</span><span class="p">:</span>
+            <span class="n">base_url</span> <span class="o">+=</span> <span class="n">app_root</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">netloc</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">path</span>
+    <span class="k">return</span> <span class="n">EnvironBuilder</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">base_url</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-3'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-3'>#</a>
+      </div>
+      <p>Works like a regular Werkzeug test client but has some knowledge about</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre><span class="k">class</span> <span class="nc">FlaskClient</span><span class="p">(</span><span class="n">Client</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-4'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>how Flask works to defer the cleanup of the request context stack to the
+end of a with body when used in a with statement.  For general information
+about how to use this class refer to :class:<code>werkzeug.test.Client</code>.</p>
+<p>Basic usage is outlined in the :ref:<code>testing</code> chapter.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="n">preserve_context</span> <span class="o">=</span> <span class="bp">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
+      </div>
+      <p>When used in combination with a with statement this opens a</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="nd">@contextmanager</span>
+    <span class="k">def</span> <span class="nf">session_transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-6'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-6'>#</a>
+      </div>
+      <p>session transaction.  This can be used to modify the session that
+the test client uses.  Once the with block is left the session is
+stored back.</p>
+<pre><code>with client.session_transaction() as session:
+    session['value'] = 42
+</code></pre>
+<p>Internally this is implemented by going through a temporary test
+request context and since session handling could depend on
+request variables this function accepts the same arguments as
+:meth:<code>~flask.Flask.test_request_context</code> which are directly
+passed through.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cookie_jar</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Session transactions only make sense &#39;</span>
+                               <span class="s">&#39;with cookies enabled.&#39;</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span>
+        <span class="n">environ_overrides</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;environ_overrides&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cookie_jar</span><span class="o">.</span><span class="n">inject_wsgi</span><span class="p">(</span><span class="n">environ_overrides</span><span class="p">)</span>
+        <span class="n">outer_reqctx</span> <span class="o">=</span> <span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">top</span>
+        <span class="k">with</span> <span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="k">as</span> <span class="n">c</span><span class="p">:</span>
+            <span class="n">sess</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">open_session</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">request</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sess</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Session backend did not open a session. &#39;</span>
+                                   <span class="s">&#39;Check the configuration&#39;</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-7'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-7'>#</a>
+      </div>
+      <p>Since we have to open a new request context for the session
+handling we want to make sure that we hide out own context
+from the caller.  By pushing the original request context
+(or None) on top of this and popping it we get exactly that
+behavior.  It's important to not use the push and pop
+methods of the actual request context object since that would
+mean that cleanup handlers are called</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>            <span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="n">outer_reqctx</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">sess</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">response_class</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">app</span><span class="o">.</span><span class="n">session_interface</span><span class="o">.</span><span class="n">is_null_session</span><span class="p">(</span><span class="n">sess</span><span class="p">):</span>
+                <span class="n">app</span><span class="o">.</span><span class="n">save_session</span><span class="p">(</span><span class="n">sess</span><span class="p">,</span> <span class="n">resp</span><span class="p">)</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">get_wsgi_headers</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">environ</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cookie_jar</span><span class="o">.</span><span class="n">extract_wsgi</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">environ</span><span class="p">,</span> <span class="n">headers</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-8'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-8'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s">&#39;environ_overrides&#39;</span><span class="p">,</span> <span class="p">{})</span> \
+            <span class="p">[</span><span class="s">&#39;flask._preserve_context&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preserve_context</span>
+
+        <span class="n">as_tuple</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;as_tuple&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">buffered</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;buffered&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">follow_redirects</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;follow_redirects&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="n">builder</span> <span class="o">=</span> <span class="n">make_test_environ_builder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Client</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">builder</span><span class="p">,</span>
+                           <span class="n">as_tuple</span><span class="o">=</span><span class="n">as_tuple</span><span class="p">,</span>
+                           <span class="n">buffered</span><span class="o">=</span><span class="n">buffered</span><span class="p">,</span>
+                           <span class="n">follow_redirects</span><span class="o">=</span><span class="n">follow_redirects</span><span class="p">)</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-9'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-9'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">preserve_context</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Cannot nest client invocations&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preserve_context</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="bp">self</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-10'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-10'>#</a>
+      </div>
+      
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preserve_context</span> <span class="o">=</span> <span class="bp">False</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-11'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-11'>#</a>
+      </div>
+      <p>on exit we want to clean up earlier.  Normally the request context
+stays preserved until the next request in the same thread comes
+in.  See RequestGlobals.push() for the general behavior.</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>        <span class="n">top</span> <span class="o">=</span> <span class="n">_request_ctx_stack</span><span class="o">.</span><span class="n">top</span>
+        <span class="k">if</span> <span class="n">top</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">top</span><span class="o">.</span><span class="n">preserved</span><span class="p">:</span>
+            <span class="n">top</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+</pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  
+</div>
+</body>
