@@ -1,0 +1,1096 @@
+
+app.py,3315
+def _make_timedelta(44,1379
+def setupmethod(50,1507
+    def wrapper_func(54,1645
+class Flask(67,2343
+    def _get_request_globals_class(168,7229
+    def _set_request_globals_class(170,7313
+    def __init__(314,13562
+    def _get_error_handlers(510,23122
+    def _set_error_handlers(515,23372
+    def name(522,23647
+    def propagate_exceptions(539,24312
+    def preserve_context_on_exception(551,24693
+    def logger(564,25093
+    def jinja_env(586,25968
+    def got_first_request(605,26755
+    def make_config(613,26977
+    def auto_find_instance_path(627,27563
+    def open_instance_resource(640,28106
+    def create_jinja_environment(651,28611
+    def create_global_jinja_loader(677,29641
+    def init_jinja_globals(690,30159
+    def select_jinja_autoescape(699,30442
+    def update_template_context(709,30755
+    def run(734,31967
+    def test_client(782,34301
+    def open_session(820,35982
+    def save_session(830,36437
+    def make_null_session(842,37014
+    def register_module(850,37307
+    def register_blueprint(877,38591
+    def add_url_rule(895,39369
+            def index(903,39674
+            def index(908,39763
+    def route(990,43336
+            def index(996,43593
+        def decorator(1016,44667
+    def endpoint(1023,44870
+            def example(1028,45031
+        def decorator(1033,45154
+    def errorhandler(1039,45290
+            def page_not_found(1044,45476
+            def special_exception_handler(1050,45683
+            def page_not_found(1057,45972
+        def decorator(1075,46783
+    def register_error_handler(1080,46925
+    def _register_error_handler(1090,47271
+    def template_filter(1103,47938
+          def reverse(1109,48193
+        def decorator(1115,48378
+    def add_template_filter(1121,48519
+    def template_test(1131,48884
+          def is_prime(1137,49131
+        def decorator(1150,49535
+    def add_template_test(1156,49674
+    def template_global(1169,50062
+        def double(1175,50335
+        def decorator(1183,50541
+    def add_template_global(1189,50682
+    def before_request(1201,51083
+    def before_first_request(1207,51279
+    def after_request(1216,51541
+    def teardown_request(1228,52046
+    def teardown_appcontext(1265,53560
+    def context_processor(1294,54527
+    def url_value_preprocessor(1300,54718
+    def url_defaults(1309,55081
+    def handle_http_exception(1317,55401
+    def trap_http_exception(1337,56115
+    def handle_user_exception(1357,57003
+    def handle_exception(1388,58402
+    def log_exception(1417,59574
+    def raise_routing_exception(1430,60034
+    def dispatch_request(1446,60713
+    def full_dispatch_request(1468,61784
+    def try_trigger_before_first_request_functions(1488,62502
+    def make_default_options_response(1504,63078
+    def make_response(1527,63869
+    def create_url_adapter(1584,66388
+    def inject_url_defaults(1606,67344
+    def handle_url_build_error(1620,67891
+    def preprocess_request(1639,68629
+    def process_response(1665,69730
+    def do_teardown_request(1691,70904
+    def do_teardown_appcontext(1712,71905
+    def app_context(1725,72363
+    def request_context(1740,72829
+    def test_request_context(1770,73906
+    def wsgi_app(1782,74403
+    def modules(1815,75783
+    def __call__(1821,76015
+
+blueprints.py,1562
+class BlueprintSetupState(17,394
+    def __init__(24,678
+    def add_url_rule(62,2201
+class Blueprint(79,2973
+    def __init__(92,3400
+    def record(107,4035
+    def record_once(120,4645
+        def wrapper(126,4946
+    def make_setup_state(131,5102
+    def register(138,5492
+    def route(155,6304
+        def decorator(159,6510
+    def add_url_rule(165,6702
+    def endpoint(174,7159
+        def decorator(181,7556
+            def register_endpoint(182,7582
+    def app_template_filter(188,7774
+        def decorator(195,8089
+    def add_app_template_filter(200,8217
+        def register_template(208,8614
+    def app_template_test(212,8761
+        def decorator(221,9100
+    def add_app_template_test(226,9226
+        def register_template(236,9645
+    def app_template_global(240,9790
+        def decorator(249,10137
+    def add_app_template_global(254,10265
+        def register_template(264,10694
+    def before_request(268,10841
+    def before_app_request(277,11199
+    def before_app_first_request(285,11509
+    def after_request(292,11795
+    def after_app_request(301,12149
+    def teardown_request(309,12477
+    def teardown_app_request(320,12976
+    def context_processor(329,13333
+    def app_context_processor(337,13664
+    def app_errorhandler(345,14002
+        def decorator(349,14198
+    def url_value_preprocessor(354,14339
+    def url_defaults(363,14709
+    def app_url_value_preprocessor(372,15053
+    def app_url_defaults(379,15310
+    def errorhandler(386,15545
+        def decorator(397,16128
+
+config.py,266
+class ConfigAttribute(21,329
+    def __init__(24,412
+    def __get__(28,535
+    def __set__(36,763
+class Config(40,842
+    def __init__(84,2627
+    def from_envvar(88,2757
+    def from_pyfile(111,3837
+    def from_object(138,4884
+    def __repr__(167,6052
+
+ctx.py,730
+class _AppCtxGlobals(20,370
+def after_this_request(25,437
+        def index(33,688
+            def add_header(35,741
+def has_request_context(50,1243
+        class User(58,1543
+            def __init__(60,1574
+        class User(69,1979
+            def __init__(71,2010
+def has_app_context(82,2347
+class AppContext(92,2617
+    def __init__(101,3004
+    def push(110,3322
+    def pop(115,3463
+    def __enter__(126,3838
+    def __exit__(130,3904
+class RequestContext(134,3983
+    def __init__(164,5535
+    def _get_g(198,6961
+    def _set_g(200,7019
+    def match_request(205,7142
+    def push(216,7521
+    def pop(250,9152
+    def __enter__(281,10243
+    def __exit__(285,10309
+    def __repr__(297,10908
+
+debughelpers.py,288
+class UnexpectedUnicodeError(13,238
+class DebugFilesKeyError(19,417
+    def __init__(24,630
+    def __str__(38,1418
+class FormDataRoutingRedirect(42,1467
+    def __init__(48,1732
+def attach_enctype_error_multidict(69,2791
+    class newcls(75,3052
+        def __getitem__(76,3078
+
+exceptions.py,115
+class JSONHTTPException(15,320
+    def get_body(24,579
+    def get_headers(31,853
+class JSONBadRequest(39,1049
+
+ext/__init__.py,18
+def setup(22,670
+
+exthook.py,265
+class ExtensionImporter(26,733
+    def __init__(32,985
+    def __eq__(38,1234
+    def __ne__(44,1538
+    def install(47,1606
+    def find_module(50,1706
+    def load_module(54,1824
+    def is_important_traceback(88,3639
+    def is_important_frame(100,4185
+
+globals.py,84
+def _lookup_req_object(17,333
+def _lookup_app_object(24,513
+def _find_app(31,693
+
+helpers.py,1317
+def _endpoint_from_view_func(53,1195
+def stream_with_context(62,1517
+        def streamed_response(74,2082
+            def generate(76,2148
+        def streamed_response(87,2482
+            def generate(88,2515
+        def decorator(99,2812
+    def generator(104,3003
+def make_response(134,4178
+        def index(143,4658
+        def index(148,4779
+def url_for(183,6024
+        def external_url_handler(208,7266
+def get_template_attribute(316,11907
+def flash(339,12676
+def get_flashed_messages(366,13862
+def send_file(405,15509
+def safe_join(552,22058
+        def wiki_page(558,22207
+def send_from_directory(579,22973
+        def download_file(587,23270
+def get_root_path(613,24289
+def find_package(646,25611
+class locked_cached_property(697,27866
+    def __init__(705,28207
+    def __get__(712,28443
+class _PackageBoundObject(723,28768
+    def __init__(725,28804
+    def _get_static_folder(740,29330
+    def _set_static_folder(743,29477
+    def _get_static_url_path(748,29671
+    def _set_static_url_path(754,29919
+    def has_static_folder(760,30141
+    def jinja_loader(769,30399
+    def get_send_file_max_age(778,30712
+            class MyFlask(794,31492
+                def get_send_file_max_age(795,31532
+    def send_static_file(804,31854
+    def open_resource(818,32477
+
+json.py,369
+class JSONEncoder(31,771
+    def default(39,1147
+            def default(47,1454
+class JSONDecoder(63,1931
+def _dump_arg_defaults(71,2263
+def _load_arg_defaults(79,2536
+def dumps(85,2704
+def dump(99,3296
+def loads(105,3459
+def load(114,3744
+def htmlsafe_dumps(121,3901
+def htmlsafe_dump(133,4380
+def jsonify(138,4533
+        def get_current_user(146,4847
+
+logging.py,150
+def create_logger(17,331
+    class DebugLogger(26,709
+        def getEffectiveLevel(27,740
+    class DebugHandler(32,894
+        def emit(33,933
+
+module.py,78
+def blueprint_is_module(17,267
+class Module(22,395
+    def __init__(32,789
+
+sessions.py,933
+def total_seconds(21,460
+class SessionMixin(25,532
+    def _get_permanent(30,690
+    def _set_permanent(33,766
+class TaggedJSONSerializer(52,1527
+    def dumps(57,1722
+        def _tag(58,1750
+    def loads(80,2821
+        def object_hook(81,2849
+class SecureCookieSession(98,3352
+    def __init__(101,3466
+        def on_update(102,3504
+class NullSession(108,3654
+    def _fail(114,3870
+class SessionInterface(123,4237
+        class Session(135,4840
+    def make_null_session(166,6007
+    def is_null_session(178,6559
+    def get_cookie_domain(187,6869
+    def get_cookie_path(213,8010
+    def get_cookie_httponly(222,8423
+    def get_cookie_secure(229,8697
+    def get_expiration_time(235,8944
+    def open_session(244,9368
+    def save_session(252,9753
+class SecureCookieSessionInterface(261,10097
+    def get_signing_serializer(279,10925
+    def open_session(290,11360
+    def save_session(304,11852
+
+signals.py,140
+    class Namespace(17,375
+        def signal(18,404
+    class _FakeSignal(21,489
+        def __init__(28,810
+        def _fail(31,914
+
+templating.py,340
+def _default_template_ctx_processor(20,448
+class Environment(35,836
+    def __init__(41,1088
+class DispatchingJinjaLoader(48,1304
+    def __init__(53,1450
+    def get_source(56,1503
+    def _iter_loaders(65,1800
+    def list_templates(89,2691
+def _render(107,3278
+def render_template(114,3485
+def render_template_string(130,4154
+
+testing.py,179
+def make_test_environ_builder(21,481
+class FlaskClient(35,1041
+    def session_transaction(47,1493
+    def open(94,3770
+    def __enter__(108,4365
+    def __exit__(114,4547
+
+testsuite/__init__.py,775
+def add_to_path(26,525
+    def _samefile(34,805
+def iter_suites(46,1139
+def find_all_tests(54,1335
+def catch_warnings(70,1741
+    def showwarning(79,2059
+def catch_stderr(90,2351
+def emits_module_deprecation_warning(100,2542
+    def new_f(101,2583
+class FlaskTestCase(110,2906
+    def ensure_clean_request_context(116,3111
+    def setup(121,3351
+    def teardown(124,3386
+    def setUp(127,3424
+    def tearDown(130,3467
+    def assert_equal(135,3601
+    def assert_raises(138,3674
+class _ExceptionCatcher(146,3915
+    def __init__(148,3949
+    def __enter__(152,4063
+    def __exit__(155,4109
+class BetterLoader(165,4467
+    def getRootSuite(174,4902
+    def loadTestsFromName(177,4954
+def setup_path(201,5682
+def suite(206,5798
+def main(219,6172
+
+testsuite/appctx.py,678
+class AppContextTestCase(19,329
+    def test_basic_url_generation(21,371
+        def index(27,574
+    def test_url_generation_requires_server_name(34,742
+    def test_url_generation_without_context_fails(40,957
+    def test_request_context_means_app_context(44,1097
+    def test_app_context_provides_current_app(50,1363
+    def test_app_tearing_down(56,1619
+        def cleanup(60,1752
+    def test_custom_app_ctx_globals_class(68,1929
+        class CustomRequestGlobals(69,1978
+            def __init__(70,2022
+    def test_context_refcounts(78,2316
+        def teardown_req(82,2440
+        def teardown_app(85,2548
+        def index(88,2643
+def suite(99,3003
+
+testsuite/basic.py,6547
+class BasicFunctionalityTestCase(26,568
+    def test_options_work(28,618
+        def index(31,736
+    def test_options_on_multiple_rules(37,969
+        def index(40,1100
+        def index_put(43,1195
+    def test_options_handling_disabled(48,1393
+        def index(50,1475
+        def index2(58,1751
+    def test_request_dispatching(65,2024
+        def index(68,2124
+        def more(71,2238
+    def test_url_mapping(88,2915
+        def index(90,2983
+        def more(92,3044
+    def test_werkzeug_routing(112,3841
+        def bar(119,4103
+        def index(121,4147
+    def test_endpoint_decorator(130,4424
+        def bar(139,4718
+        def index(143,4794
+    def test_session(150,4987
+        def set(154,5131
+        def get(158,5273
+    def test_session_using_server_name(165,5500
+        def index(172,5711
+    def test_session_using_server_name_and_port(179,6020
+        def index(186,6245
+    def test_session_using_server_name_port_and_path(193,6559
+        def index(201,6826
+    def test_session_using_application_root(209,7212
+        class PrefixPathMiddleware(210,7263
+            def __init__(211,7307
+            def __call__(214,7420
+        def index(225,7817
+    def test_session_using_session_settings(231,8052
+        def index(243,8485
+    def test_missing_session(253,8893
+        def expect_exception(255,8965
+    def test_session_expiration(267,9489
+        def index(272,9648
+        def test(278,9807
+    def test_session_stored_last(300,10650
+        def modify_session(306,10824
+        def dump_session_contents(310,10952
+    def test_session_special_types(317,11171
+        def modify_session(324,11402
+        def dump_session_contents(331,11630
+    def test_flashes(342,12015
+    def test_extended_flashing(354,12446
+        def index(366,12891
+        def test(373,13123
+        def test_with_categories(382,13507
+        def test_filter(391,13955
+        def test_filters(398,14263
+        def test_filters2(406,14703
+    def test_request_processing(435,15542
+        def before_request(439,15663
+        def after_request(442,15754
+        def index(447,15914
+    def test_after_request_processing(456,16226
+        def index(460,16358
+            def foo(462,16417
+    def test_teardown_request_handler(471,16726
+        def teardown_request(475,16857
+        def root(479,16977
+    def test_teardown_request_handler_debug_mode(486,17201
+        def teardown_request(491,17370
+        def root(495,17490
+    def test_teardown_request_handler_error(502,17714
+        def teardown_request1(506,17851
+        def teardown_request2(517,18278
+        def fails(528,18699
+    def test_before_after_request_order(535,18923
+        def before1(539,19054
+        def before2(542,19134
+        def after1(545,19213
+        def after2(549,19327
+        def finish1(553,19444
+        def finish2(556,19529
+        def index(559,19608
+    def test_error_handling(565,19789
+        def not_found(568,19891
+        def internal_server_error(571,19984
+        def index(574,20094
+        def error(577,20173
+    def test_before_request_and_routing_errors(587,20499
+        def attach_something(590,20617
+        def return_something(593,20720
+    def test_user_error_handling(599,20931
+        class MyException(600,20971
+        def handle_my_exception(605,21102
+        def index(609,21239
+    def test_trapping_of_bad_request_key_errors(615,21373
+        def fail(619,21519
+    def test_trapping_of_all_http_exceptions(633,21937
+        def fail(638,22130
+    def test_enctype_debug_helper(649,22354
+        def index(654,22560
+    def test_teardown_on_pop(669,23206
+        def end_of_request(673,23328
+    def test_response_creation(682,23564
+        def from_unicode(685,23669
+        def from_string(688,23763
+        def from_tuple(691,23870
+    def test_make_response(705,24465
+    def test_make_response_with_response_instance(723,25177
+    def test_url_generation(746,26166
+        def hello(749,26291
+    def test_build_error_handler(756,26609
+        def handler(775,27315
+    def test_custom_converters(782,27590
+        class ListConverter(784,27679
+            def to_python(785,27723
+            def to_url(787,27803
+        def index(793,28093
+    def test_static_files(798,28240
+    def test_none_response(807,28653
+        def test(810,28747
+    def test_request_locals(820,29034
+    def test_proper_test_request_context(824,29169
+        def index(831,29368
+        def sub(835,29455
+    def test_test_app_proper_environ(871,30917
+        def index(877,31111
+        def subdomain(881,31199
+    def test_exception_propagation(922,32925
+        def apprunner(923,32967
+            def index(926,33069
+    def test_max_content_length(949,33965
+        def always_first(953,34114
+        def accept_file(957,34263
+        def catcher(961,34394
+    def test_url_processors(968,34580
+        def add_language_code(972,34678
+        def pull_lang_code(978,34954
+        def index(982,35099
+        def about(986,35204
+        def something_else(990,35304
+    def test_inject_blueprint_url_defaults(999,35610
+        def bp_defaults(1005,35828
+        def view(1008,35937
+    def test_debug_mode_complains_after_first_request(1022,36345
+        def index(1026,36491
+            def broken(1032,36703
+        def working(1041,36970
+    def test_before_first_request_functions(1046,37132
+        def foo(1050,37270
+    def test_routing_redirect_debugging(1059,37503
+        def foo(1063,37664
+    def test_route_decorator_custom_endpoint(1083,38398
+        def foo(1088,38540
+        def for_bar(1092,38646
+        def for_bar_foo(1096,38759
+    def test_preserve_only_once(1109,39220
+        def fail_func(1114,39349
+class ContextTestCase(1130,39859
+    def test_context_binding(1132,39898
+        def index(1135,39994
+        def meh(1138,40102
+    def test_context_test(1147,40437
+    def test_manual_context_binding(1159,40807
+        def index(1162,40910
+class SubdomainTestCase(1177,41284
+    def test_basic_support(1179,41325
+        def normal_index(1183,41467
+        def test_index(1186,41571
+    def test_module_static_path_subdomain(1197,41895
+    def test_subdomain_matching(1206,42267
+        def index(1210,42434
+    def test_subdomain_matching_with_ports(1217,42645
+        def index(1221,42828
+    def test_module_subdomain_support(1229,43082
+        def test(1235,43306
+        def bar(1239,43406
+def suite(1251,43728
+
+testsuite/blueprints.py,4497
+class ModuleTestCase(30,767
+    def test_basic_module(33,843
+        def admin_index(37,1007
+        def admin_login(40,1098
+        def admin_logout(43,1190
+        def index(46,1276
+    def test_default_endpoint_name(56,1692
+        def index(59,1819
+    def test_request_processing(69,2183
+        def before_admin_request(74,2378
+        def after_admin_request(77,2486
+        def admin_index(81,2625
+        def before_request(84,2711
+        def after_request(87,2809
+        def index(91,2938
+    def test_context_processors(105,3423
+        def inject_all_regualr(109,3598
+        def inject_admin(112,3693
+        def inject_all_module(115,3786
+        def index(118,3871
+        def admin_index(121,3991
+    def test_late_binding(129,4300
+        def index(133,4443
+    def test_error_handling(139,4654
+        def not_found(143,4810
+        def internal_server_error(146,4909
+        def index(149,5021
+        def error(152,5102
+    def test_templates_and_static(163,5463
+    def test_safe_access(194,6684
+    def test_endpoint_decorator(229,7680
+        def bar(242,8082
+        def index(246,8161
+class BlueprintTestCase(256,8392
+    def test_blueprint_specific_error_handling(258,8433
+        def frontend_forbidden(264,8691
+        def frontend_no(268,8810
+        def backend_forbidden(272,8902
+        def backend_no(276,9017
+        def sideend_no(280,9118
+        def app_forbidden(289,9363
+    def test_blueprint_url_definitions(298,9715
+        def foo(302,9857
+        def bar(306,9951
+    def test_blueprint_url_processors(319,10456
+        def add_language_code(323,10605
+        def pull_lang_code(327,10752
+        def index(331,10878
+        def about(335,10971
+    def test_templates_and_static(346,11258
+    def test_default_static_cache_timeout(389,13118
+        class MyBlueprint(391,13203
+            def get_send_file_max_age(392,13247
+    def test_templates_list(412,14178
+    def test_dotted_names(418,14429
+        def frontend_index(423,14618
+        def frontend_page2(427,14745
+        def backend_index(431,14858
+    def test_empty_url_defaults(443,15284
+        def something(448,15452
+    def test_route_decorator_custom_endpoint(458,15716
+        def foo(463,15841
+        def foo_bar(467,15945
+        def foo_bar_foo(471,16057
+        def bar_foo(475,16157
+        def index(482,16337
+    def test_route_decorator_custom_endpoint_with_dots(492,16727
+        def foo(496,16861
+            def foo_bar(501,16986
+            def foo_bar_foo(510,17260
+        def foo_foo_foo(517,17471
+    def test_template_filter(544,18217
+        def my_reverse(547,18332
+    def test_add_template_filter(555,18697
+        def my_reverse(557,18782
+    def test_template_filter_with_name(566,19194
+        def my_reverse(569,19327
+    def test_add_template_filter_with_name(577,19680
+        def my_reverse(579,19775
+    def test_template_filter_with_template(588,20185
+        def super_reverse(591,20314
+        def index(596,20484
+    def test_template_filter_after_route_with_template(601,20668
+        def index(604,20790
+        def super_reverse(608,20969
+    def test_add_template_filter_with_template(614,21163
+        def super_reverse(616,21262
+        def index(622,21482
+    def test_template_filter_with_name_and_template(627,21666
+        def my_reverse(630,21819
+        def index(635,21986
+    def test_add_template_filter_with_name_and_template(640,22170
+        def my_reverse(642,22278
+        def index(648,22509
+    def test_template_test(653,22693
+        def is_boolean(656,22804
+    def test_add_template_test(664,23169
+        def is_boolean(666,23252
+    def test_template_test_with_name(675,23662
+        def is_boolean(678,23792
+    def test_add_template_test_with_name(686,24148
+        def is_boolean(688,24241
+    def test_template_test_with_template(697,24653
+        def boolean(700,24778
+        def index(705,24962
+    def test_template_test_after_route_with_template(710,25144
+        def index(713,25264
+        def boolean(717,25438
+    def test_add_template_test_with_template(723,25647
+        def boolean(725,25744
+        def index(731,25970
+    def test_template_test_with_name_and_template(736,26152
+        def is_boolean(739,26295
+        def index(744,26482
+    def test_add_template_test_with_name_and_template(749,26664
+        def is_boolean(751,26770
+        def index(757,27013
+def suite(762,27195
+
+testsuite/config.py,1188
+class ConfigTestCase(27,483
+    def common_object_test(29,521
+    def test_config_from_file(34,727
+    def test_config_from_object(39,905
+    def test_config_from_class(44,1059
+        class Base(45,1097
+        class Test(47,1154
+    def test_config_from_envvar(53,1325
+    def test_config_from_envvar_missing(72,2032
+    def test_config_missing(90,2770
+    def test_session_lifetime(103,3310
+class LimitedLoaderMockWrapper(109,3509
+    def __init__(110,3549
+    def __getattr__(113,3611
+def patch_pkgutil_get_loader(121,3860
+    def get_loader(129,4250
+class InstanceTestCase(138,4471
+    def test_explicit_instance_paths(140,4511
+    def test_main_module_paths(152,4940
+    def test_uninstalled_module_paths(160,5279
+    def test_uninstalled_package_paths(165,5515
+    def test_installed_module_paths(170,5753
+    def test_installed_module_paths_with_limited_loader(187,6519
+    def test_installed_package_paths(205,7386
+    def test_installed_package_paths_with_limited_loader(222,8172
+    def test_prefix_package_paths(240,9059
+    def test_prefix_package_paths_with_limited_loader(257,9843
+    def test_egg_installed_paths(275,10728
+def suite(296,11643
+
+testsuite/deprecations.py,194
+class DeprecationsTestCase(19,353
+    def test_init_jinja_globals(21,397
+        class MyFlask(22,436
+            def init_jinja_globals(23,472
+            def foo(29,670
+def suite(38,951
+
+testsuite/examples.py,41
+def setup_path(16,277
+def suite(23,532
+
+testsuite/ext.py,922
+class ExtImportHookTestCase(18,323
+    def setup(20,368
+    def teardown(43,1330
+    def test_flaskext_new_simple_import_normal(48,1459
+    def test_flaskext_new_simple_import_module(52,1616
+    def test_flaskext_new_package_import_normal(57,1853
+    def test_flaskext_new_package_import_module(61,2013
+    def test_flaskext_new_package_import_submodule_function(66,2256
+    def test_flaskext_new_package_import_submodule(70,2440
+    def test_flaskext_old_simple_import_normal(75,2691
+    def test_flaskext_old_simple_import_module(79,2848
+    def test_flaskext_old_package_import_normal(84,3088
+    def test_flaskext_old_package_import_module(88,3248
+    def test_flaskext_old_package_import_submodule(93,3494
+    def test_flaskext_old_package_import_submodule_function(98,3748
+    def test_flaskext_broken_package_no_module_caching(102,3932
+    def test_no_error_swallowing(107,4113
+def suite(120,4596
+
+testsuite/helpers.py,2754
+def has_encoding(23,496
+class JSONTestCase(32,646
+    def test_json_bad_requests(34,682
+        def return_json(37,802
+    def test_json_bad_requests_content_type(43,1034
+        def return_json(46,1167
+    def test_json_body_encoding(55,1599
+        def index(59,1725
+    def test_jsonify(67,2035
+        def return_kwargs(71,2167
+        def return_dict(74,2262
+    def test_json_as_unicode(82,2542
+    def test_json_attr(95,2962
+        def add(98,3073
+    def test_template_escaping(105,3371
+    def test_json_customization(116,3876
+        class X(117,3915
+            def __init__(118,3940
+        class MyEncoder(120,4008
+            def default(121,4057
+        class MyDecoder(125,4233
+            def __init__(126,4282
+            def object_hook(129,4469
+        def index(138,4809
+    def test_modified_url_encoding(146,5090
+        class ModifiedRequest(147,5132
+        def index(154,5357
+class SendfileTestCase(165,5694
+    def test_send_file_regular(167,5734
+    def test_send_file_xsendfile(176,6123
+    def test_send_file_object(187,6608
+    def test_attachment(237,8762
+    def test_static_file(264,10144
+        class StaticFileApp(286,11321
+            def get_send_file_max_age(287,11363
+class LoggingTestCase(301,11977
+    def test_logger_cache(303,12016
+    def test_debug_log(311,12315
+        def index(316,12431
+        def exc(322,12623
+    def test_debug_log_override(342,13340
+    def test_exception_logging(349,13583
+        def index(356,13820
+    def test_processor_exceptions(369,14236
+        def before_request(372,14341
+        def after_request(376,14454
+        def index(381,14598
+        def internal_server_error(384,14675
+    def test_url_for_with_anchor(391,14957
+        def index(394,15057
+    def test_url_for_with_scheme(400,15254
+        def index(403,15354
+    def test_url_for_with_scheme_not_external(411,15668
+        def index(414,15781
+    def test_url_with_method(422,16045
+        class MyView(425,16160
+            def get(426,16194
+            def post(430,16332
+class NoImportsTestCase(449,17136
+    def test_name_with_import_error(460,17670
+class StreamingTestCase(467,17873
+    def test_streaming_with_context(469,17914
+        def index(473,18044
+            def generate(474,18065
+    def test_streaming_with_context_as_decorator(483,18388
+        def index(487,18531
+            def generate(489,18591
+    def test_streaming_with_context_and_custom_close(498,18887
+        class Wrapper(502,19030
+            def __init__(503,19061
+            def __iter__(505,19130
+            def close(507,19190
+            def next(509,19253
+        def index(512,19345
+            def generate(513,19366
+def suite(525,19755
+
+testsuite/regression.py,509
+class _NoLeakAsserter(27,489
+    def __init__(29,521
+    def __enter__(32,589
+    def __exit__(46,1071
+class MemoryTestCase(56,1379
+    def assert_no_leak(58,1417
+    def test_memory_consumption(61,1485
+        def index(64,1584
+        def fire(67,1683
+    def test_safe_join_toplevel_pardir(83,2186
+class ExceptionTestCase(89,2357
+    def test_aborting(91,2398
+        class Foo(92,2427
+        def handle_foo(97,2577
+        def index(100,2663
+        def test(103,2781
+def suite(113,3047
+
+testsuite/signals.py,480
+class SignalsTestCase(16,272
+    def test_template_rendered(18,311
+        def index(22,410
+        def record(26,531
+    def test_request_signals(39,1026
+        def before_request_signal(43,1118
+        def after_request_signal(46,1204
+        def before_request_handler(51,1380
+        def after_request_handler(55,1489
+        def index(61,1665
+    def test_request_exception_signal(79,2338
+        def index(84,2466
+        def record(87,2504
+def suite(99,2928
+
+testsuite/subclassing.py,210
+class FlaskSubclassingTestCase(19,405
+    def test_suppressed_exception_logging(21,453
+        class SuppressedFlask(22,502
+            def log_exception(23,546
+        def index(32,829
+def suite(43,1078
+
+testsuite/templating.py,2410
+class TemplatingTestCase(19,329
+    def test_context_processing(21,371
+        def context_processor(24,477
+        def index(27,576
+    def test_original_win(32,761
+        def index(35,854
+    def test_request_less_rendering(40,1032
+        def context_processor(44,1193
+    def test_standard_context(52,1490
+        def index(56,1630
+    def test_escaping(68,2049
+        def index(72,2171
+    def test_no_escaping(85,2641
+    def test_macros(93,3002
+    def test_template_filter(99,3242
+        def my_reverse(102,3345
+    def test_add_template_filter(108,3621
+        def my_reverse(110,3697
+    def test_template_filter_with_name(117,4017
+        def my_reverse(120,4138
+    def test_add_template_filter_with_name(126,4402
+        def my_reverse(128,4488
+    def test_template_filter_with_template(135,4806
+        def super_reverse(138,4923
+        def index(141,5004
+    def test_add_template_filter_with_template(146,5188
+        def super_reverse(148,5278
+        def index(152,5406
+    def test_template_filter_with_name_and_template(157,5590
+        def my_reverse(160,5731
+        def index(163,5809
+    def test_add_template_filter_with_name_and_template(168,5993
+        def my_reverse(170,6092
+        def index(174,6231
+    def test_template_test(179,6415
+        def boolean(182,6514
+    def test_add_template_test(188,6775
+        def boolean(190,6849
+    def test_template_test_with_name(197,7149
+        def is_boolean(200,7267
+    def test_add_template_test_with_name(206,7534
+        def is_boolean(208,7618
+    def test_template_test_with_template(215,7938
+        def boolean(218,8051
+        def index(221,8146
+    def test_add_template_test_with_template(226,8328
+        def boolean(228,8416
+        def index(232,8550
+    def test_template_test_with_name_and_template(237,8732
+        def is_boolean(240,8863
+        def index(243,8961
+    def test_add_template_test_with_name_and_template(248,9143
+        def is_boolean(250,9240
+        def index(254,9391
+    def test_add_template_global(259,9573
+        def get_stuff(262,9680
+    def test_custom_template_loader(271,10069
+        class MyFlask(272,10112
+            def create_global_jinja_loader(273,10148
+        def index(278,10373
+    def test_iterable_loader(284,10562
+        def context_processor(287,10665
+        def index(290,10764
+def suite(301,11113
+
+testsuite/test_apps/blueprintapp/apps/admin/__init__.py,36
+def index(9,213
+def index2(14,299
+
+testsuite/test_apps/blueprintapp/apps/frontend/__init__.py,17
+def index(7,141
+
+testsuite/test_apps/flask_newext_package/submodule.py,23
+def test_function(1,0
+
+testsuite/test_apps/flaskext/oldext_package/submodule.py,23
+def test_function(1,0
+
+testsuite/test_apps/moduleapp/apps/admin/__init__.py,36
+def index(8,110
+def index2(13,196
+
+testsuite/test_apps/moduleapp/apps/frontend/__init__.py,16
+def index(8,95
+
+testsuite/testing.py,982
+class TestToolsTestCase(19,322
+    def test_environ_defaults_from_config(21,363
+        def index(27,602
+    def test_environ_defaults(36,914
+        def index(40,1038
+    def test_redirect_keep_session(49,1328
+        def index(54,1491
+        def get_session(61,1716
+    def test_session_transactions(81,2381
+        def index(87,2545
+    def test_session_transactions_no_null_sessions(101,3061
+    def test_session_transactions_keep_context(114,3504
+    def test_session_transaction_needs_cookies(126,3934
+    def test_test_client_context_binding(138,4320
+        def index(141,4428
+        def other(146,4544
+    def test_reuse_client(168,5234
+    def test_test_client_calls_teardown_handlers(178,5486
+        def remember(182,5628
+class SubdomainTestCase(201,6163
+    def setUp(203,6204
+    def tearDown(211,6445
+    def test_subdomain(215,6532
+        def view(217,6617
+    def test_nosubdomain(227,6876
+        def view(229,6949
+def suite(239,7208
+
+testsuite/views.py,1235
+class ViewTestCase(18,372
+    def common_test(20,408
+    def test_basic_view(29,787
+        class Index(32,855
+            def dispatch_request(34,932
+    def test_method_based_view(40,1112
+        class Index(43,1187
+            def get(44,1232
+            def post(46,1288
+    def test_view_patching(53,1443
+        class Index(56,1514
+            def get(57,1559
+            def post(59,1606
+        class Other(62,1655
+            def get(63,1683
+            def post(65,1739
+    def test_view_inheritance(73,1945
+        class Index(76,2019
+            def get(77,2064
+            def post(79,2120
+        class BetterIndex(82,2179
+            def delete(83,2213
+    def test_view_decorators(92,2546
+        def add_x_parachute(95,2619
+            def new_function(96,2651
+        class Index(102,2878
+            def dispatch_request(104,2960
+    def test_implicit_head(113,3263
+        class Index(116,3334
+            def get(117,3379
+    def test_explicit_head(131,3876
+        class Index(134,3947
+            def get(135,3992
+            def head(137,4048
+    def test_endpoint_override(148,4432
+        class Index(152,4532
+            def dispatch_request(154,4609
+def suite(166,4977
+
+views.py,465
+class View(18,399
+        class MyView(25,735
+            def dispatch_request(28,794
+        class SecretView(37,1184
+            def dispatch_request(41,1293
+    def dispatch_request(64,2162
+    def as_view(72,2436
+        def view(81,2892
+class MethodViewType(104,3780
+    def __new__(106,3809
+class MethodView(122,4433
+        class CounterAPI(130,4827
+            def get(132,4866
+            def post(135,4943
+    def dispatch_request(143,5189
+
+wrappers.py,257
+class Request(21,503
+    def max_content_length(56,1813
+    def endpoint(63,2052
+    def module(73,2418
+    def blueprint(86,2935
+    def json(92,3150
+    def on_json_loading_failed(107,3772
+    def _load_form_data(126,4590
+class Response(137,5013
+
+testsuite/test_apps/subdomaintestmodule/__init__.py,0
+
+testsuite/test_apps/path/installed_package/__init__.py,0
+
+testsuite/test_apps/moduleapp/apps/__init__.py,0
+
+testsuite/test_apps/moduleapp/__init__.py,0
+
+testsuite/test_apps/main_app.py,0
+
+testsuite/test_apps/lib/python2.5/site-packages/site_package/__init__.py,0
+
+testsuite/test_apps/lib/python2.5/site-packages/site_app.py,0
+
+testsuite/test_apps/importerror.py,0
+
+testsuite/test_apps/flaskext/oldext_simple.py,0
+
+testsuite/test_apps/flaskext/oldext_package/__init__.py,0
+
+testsuite/test_apps/flaskext/__init__.py,0
+
+testsuite/test_apps/flask_newext_simple.py,0
+
+testsuite/test_apps/flask_newext_package/__init__.py,0
+
+testsuite/test_apps/flask_broken/b.py,0
+
+testsuite/test_apps/flask_broken/__init__.py,0
+
+testsuite/test_apps/config_package_app/__init__.py,0
+
+testsuite/test_apps/config_module_app.py,0
+
+testsuite/test_apps/blueprintapp/apps/__init__.py,0
+
+testsuite/test_apps/blueprintapp/__init__.py,0
+
+__init__.py,0
