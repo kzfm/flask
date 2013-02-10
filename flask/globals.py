@@ -10,7 +10,11 @@
     :license: BSD, see LICENSE for more details.
 """
 
+# http://docs.python.jp/2.5/lib/module-functools.html
 from functools import partial
+# http://werkzeug.pocoo.org/docs/local/
+# Acts as a proxy for a werkzeug local
+# werkzeugを理解しないとわからん
 from werkzeug.local import LocalStack, LocalProxy
 
 
