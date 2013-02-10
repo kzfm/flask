@@ -10,6 +10,8 @@
     :license: BSD, see LICENSE for more details.
 """
 signals_available = False
+# http://discorporate.us/projects/Blinker/docs/1.1/api.html#blinker.base.Namespace
+# blinkerがimportできない場合には偽クラスを用意する
 try:
     from blinker import Namespace
     signals_available = True

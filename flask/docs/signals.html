@@ -29,11 +29,7 @@ falls silently back to a noop
 </code></pre>
     </div>
     <div class='code'>
-      <div class="highlight"><pre><span class="n">signals_available</span> <span class="o">=</span> <span class="bp">False</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">blinker</span> <span class="kn">import</span> <span class="n">Namespace</span>
-    <span class="n">signals_available</span> <span class="o">=</span> <span class="bp">True</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span></pre></div>
+      <div class="highlight"><pre><span class="n">signals_available</span> <span class="o">=</span> <span class="bp">False</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -42,10 +38,14 @@ falls silently back to a noop
       <div class='octowrap'>
         <a class='octothorpe' href='#section-1'>#</a>
       </div>
-      
+      <p>http://discorporate.us/projects/Blinker/docs/1.1/api.html#blinker.base.Namespace
+blinkerがimportできない場合には偽クラスを用意する</p>
     </div>
     <div class='code'>
-      <div class="highlight"><pre>    <span class="k">class</span> <span class="nc">Namespace</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></pre></div>
+      <div class="highlight"><pre><span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">blinker</span> <span class="kn">import</span> <span class="n">Namespace</span>
+    <span class="n">signals_available</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -57,8 +57,7 @@ falls silently back to a noop
       
     </div>
     <div class='code'>
-      <div class="highlight"><pre>        <span class="k">def</span> <span class="nf">signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">_FakeSignal</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span></pre></div>
+      <div class="highlight"><pre>    <span class="k">class</span> <span class="nc">Namespace</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -67,10 +66,11 @@ falls silently back to a noop
       <div class='octowrap'>
         <a class='octothorpe' href='#section-3'>#</a>
       </div>
-      <p>If blinker is unavailable, create a fake class with the same</p>
+      
     </div>
     <div class='code'>
-      <div class="highlight"><pre>    <span class="k">class</span> <span class="nc">_FakeSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></pre></div>
+      <div class="highlight"><pre>        <span class="k">def</span> <span class="nf">signal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_FakeSignal</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span></pre></div>
     </div>
   </div>
   <div class='clearall'></div>
@@ -78,6 +78,18 @@ falls silently back to a noop
     <div class='docs'>
       <div class='octowrap'>
         <a class='octothorpe' href='#section-4'>#</a>
+      </div>
+      <p>If blinker is unavailable, create a fake class with the same</p>
+    </div>
+    <div class='code'>
+      <div class="highlight"><pre>    <span class="k">class</span> <span class="nc">_FakeSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span></pre></div>
+    </div>
+  </div>
+  <div class='clearall'></div>
+  <div class='section' id='section-5'>
+    <div class='docs'>
+      <div class='octowrap'>
+        <a class='octothorpe' href='#section-5'>#</a>
       </div>
       <p>interface that allows sending of signals but will fail with an
 error on anything else.  Instead of doing anything on send, it
@@ -88,10 +100,10 @@ will just ignore the arguments and do nothing instead.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-5'>
+  <div class='section' id='section-6'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-5'>#</a>
+        <a class='octothorpe' href='#section-6'>#</a>
       </div>
       
     </div>
@@ -102,10 +114,10 @@ will just ignore the arguments and do nothing instead.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-6'>
+  <div class='section' id='section-7'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-6'>#</a>
+        <a class='octothorpe' href='#section-7'>#</a>
       </div>
       
     </div>
@@ -121,10 +133,10 @@ will just ignore the arguments and do nothing instead.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-7'>
+  <div class='section' id='section-8'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-7'>#</a>
+        <a class='octothorpe' href='#section-8'>#</a>
       </div>
       <p>the namespace for code signals.  If you are not flask code, do
 not put signals in here.  Create your own namespace instead.</p>
@@ -134,10 +146,10 @@ not put signals in here.  Create your own namespace instead.</p>
     </div>
   </div>
   <div class='clearall'></div>
-  <div class='section' id='section-8'>
+  <div class='section' id='section-9'>
     <div class='docs'>
       <div class='octowrap'>
-        <a class='octothorpe' href='#section-8'>#</a>
+        <a class='octothorpe' href='#section-9'>#</a>
       </div>
       <p>core signals.  For usage examples grep the sourcecode or consult
 the API documentation in docs/api.rst as well as docs/signals.rst</p>
